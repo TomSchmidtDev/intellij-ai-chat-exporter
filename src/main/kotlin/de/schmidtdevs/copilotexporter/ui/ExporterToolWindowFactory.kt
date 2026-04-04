@@ -40,7 +40,7 @@ class ExporterToolWindowFactory : ToolWindowFactory {
             ?.version
         if (version != null) {
             // stripeTitle = Text im seitlichen Icon-Strip der IDE
-            toolWindow.stripeTitle = "Copilot Exporter $version"
+            toolWindow.stripeTitle = "Copilot Chat Exporter $version"
         }
 
         val content = ContentFactory.getInstance()

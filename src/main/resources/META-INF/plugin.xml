@@ -48,7 +48,7 @@
             - secondary: true = standardmäßig in der sekundären (ausgeblendeten) Leiste
         -->
         <toolWindow
-                id="Copilot Exporter"
+                id="Copilot Chat Exporter"
                 factoryClass="de.schmidtdevs.copilotexporter.ui.ExporterToolWindowFactory"
                 anchor="right"
                 secondary="true"
