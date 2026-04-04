@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "de.schmidtdevs"
-version = "1.4.0"
+version = "1.4.1"
 
 // LERNHINWEIS: IntelliJ IDEA 2024.1 läuft auf Java 17 und erwartet Bytecode
 // für Java 17. Wir bauen mit dem System-JDK (Java 21), setzen aber
