@@ -1,0 +1,67 @@
+name: Release
+
+# Trigger: push a version tag, e.g.  git tag v1.4.2 && git push origin v1.4.2
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write   # needed to create GitHub Releases
+
+jobs:
+  release:
+    name: Build · Sign · Publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # ── 1. Build ──────────────────────────────────────────────────────────────
+      - name: Build Plugin
+        run: ./gradlew buildPlugin
+
+      # ── 2. Sign (requires GitHub Secrets) ────────────────────────────────────
+      # Required secrets (Settings → Secrets and variables → Actions):
+      #   CERTIFICATE_CHAIN   – PEM certificate chain
+      #   PRIVATE_KEY         – PEM private key
+      #   PRIVATE_KEY_PASSWORD – key passphrase (use empty string "" if none)
+      #
+      # Generate a self-signed certificate with the marketplace-zip-signer CLI:
+      #   https://github.com/JetBrains/marketplace-zip-signer
+      - name: Sign Plugin
+        env:
+          CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          PRIVATE_KEY_PASSWORD: ${{ secrets.PRIVATE_KEY_PASSWORD }}
+        run: ./gradlew signPlugin
+
+      # ── 3. Publish to JetBrains Marketplace ──────────────────────────────────
+      # Required secret:
+      #   PUBLISH_TOKEN – Personal Access Token from https://plugins.jetbrains.com/author/me/tokens
+      #
+      # IMPORTANT: The very first upload must be done manually via the Marketplace UI.
+      # Subsequent versions can be published automatically with this step.
+      - name: Publish to JetBrains Marketplace
+        env:
+          PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
+        run: ./gradlew publishPlugin
+
+      # ── 4. Create GitHub Release ──────────────────────────────────────────────
+      # Attaches the signed plugin ZIP to the GitHub Release.
+      # The signed ZIP is written to build/distributions/ by signPlugin.
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/distributions/*.zip
+          generate_release_notes: true
