@@ -3,7 +3,7 @@ plugins {
     id("org.jetbrains.intellij.platform") version "2.3.0"
 }
 
-group = "de.schmidtdevs"
+group = "de.tomschmidtdev"
 version = "1.4.3"
 
 kotlin {
@@ -19,7 +19,7 @@ java {
 
 intellijPlatform {
     pluginConfiguration {
-        id = "de.schmidtdevs.copilot-chat-exporter"
+        id = "de.tomschmidtdev.copilot-chat-exporter"
         name = "Copilot Chat Exporter"
         version = project.version.toString()
 

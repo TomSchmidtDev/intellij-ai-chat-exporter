@@ -1,11 +1,11 @@
-package de.schmidtdevs.copilotexporter.services
+package de.tomschmidtdev.copilotexporter.services
 
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
-import de.schmidtdevs.copilotexporter.model.ChatMessage
-import de.schmidtdevs.copilotexporter.model.ChatSession
-import de.schmidtdevs.copilotexporter.model.Role
+import de.tomschmidtdev.copilotexporter.model.ChatMessage
+import de.tomschmidtdev.copilotexporter.model.ChatSession
+import de.tomschmidtdev.copilotexporter.model.Role
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.dizitart.no2.Nitrite
 import org.dizitart.no2.collection.Document

@@ -1,4 +1,4 @@
-package de.schmidtdevs.copilotexporter.model
+package de.tomschmidtdev.copilotexporter.model
 
 import java.time.Instant
 import java.time.ZoneId

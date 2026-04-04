@@ -1,9 +1,9 @@
-package de.schmidtdevs.copilotexporter.export
+package de.tomschmidtdev.copilotexporter.export
 
-import de.schmidtdevs.copilotexporter.model.ChatMessage
-import de.schmidtdevs.copilotexporter.model.ChatSession
-import de.schmidtdevs.copilotexporter.model.Role
-import de.schmidtdevs.copilotexporter.settings.ExporterSettings
+import de.tomschmidtdev.copilotexporter.model.ChatMessage
+import de.tomschmidtdev.copilotexporter.model.ChatSession
+import de.tomschmidtdev.copilotexporter.model.Role
+import de.tomschmidtdev.copilotexporter.settings.ExporterSettings
 
 /**
  * Konvertiert Chat-Sessions in selbst-enthaltenes, dark-theme HTML.

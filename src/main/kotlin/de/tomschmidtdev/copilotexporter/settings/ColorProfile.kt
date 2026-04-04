@@ -1,4 +1,4 @@
-package de.schmidtdevs.copilotexporter.settings
+package de.tomschmidtdev.copilotexporter.settings
 
 // =============================================================================
 // ColorProfile – Farbschema für den HTML-Export

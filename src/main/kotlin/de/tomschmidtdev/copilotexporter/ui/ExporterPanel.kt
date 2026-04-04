@@ -1,4 +1,4 @@
-package de.schmidtdevs.copilotexporter.ui
+package de.tomschmidtdev.copilotexporter.ui
 
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.application.ApplicationManager
@@ -16,13 +16,13 @@ import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
-import de.schmidtdevs.copilotexporter.export.HtmlExporter
-import de.schmidtdevs.copilotexporter.export.MarkdownExporter
-import de.schmidtdevs.copilotexporter.model.ChatMessage
-import de.schmidtdevs.copilotexporter.model.ChatSession
-import de.schmidtdevs.copilotexporter.model.Role
-import de.schmidtdevs.copilotexporter.services.CopilotChatReaderService
-import de.schmidtdevs.copilotexporter.settings.ExporterSettingsConfigurable
+import de.tomschmidtdev.copilotexporter.export.HtmlExporter
+import de.tomschmidtdev.copilotexporter.export.MarkdownExporter
+import de.tomschmidtdev.copilotexporter.model.ChatMessage
+import de.tomschmidtdev.copilotexporter.model.ChatSession
+import de.tomschmidtdev.copilotexporter.model.Role
+import de.tomschmidtdev.copilotexporter.services.CopilotChatReaderService
+import de.tomschmidtdev.copilotexporter.settings.ExporterSettingsConfigurable
 import java.awt.BorderLayout
 import java.awt.FlowLayout
 import javax.swing.BorderFactory

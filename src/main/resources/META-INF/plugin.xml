@@ -1,6 +1,6 @@
 <idea-plugin>
 
-    <id>de.schmidtdevs.copilot-chat-exporter</id>
+    <id>de.tomschmidtdev.copilot-chat-exporter</id>
     <name>Copilot Chat Exporter</name>
 
     <vendor url="https://github.com/TomSchmidtDev">schmidtdevs</vendor>
@@ -35,21 +35,21 @@
 
         <toolWindow
                 id="Copilot Chat Exporter"
-                factoryClass="de.schmidtdevs.copilotexporter.ui.ExporterToolWindowFactory"
+                factoryClass="de.tomschmidtdev.copilotexporter.ui.ExporterToolWindowFactory"
                 anchor="right"
                 secondary="true"
                 icon="/icons/pluginIcon.svg"/>
 
         <projectService
-                serviceImplementation="de.schmidtdevs.copilotexporter.services.CopilotChatReaderService"/>
+                serviceImplementation="de.tomschmidtdev.copilotexporter.services.CopilotChatReaderService"/>
 
         <applicationService
-                serviceImplementation="de.schmidtdevs.copilotexporter.settings.ExporterSettings"/>
+                serviceImplementation="de.tomschmidtdev.copilotexporter.settings.ExporterSettings"/>
 
         <applicationConfigurable
                 parentId="tools"
-                instance="de.schmidtdevs.copilotexporter.settings.ExporterSettingsConfigurable"
-                id="de.schmidtdevs.copilotexporter.settings"
+                instance="de.tomschmidtdev.copilotexporter.settings.ExporterSettingsConfigurable"
+                id="de.tomschmidtdev.copilotexporter.settings"
                 displayName="Copilot Chat Exporter"/>
 
     </extensions>

@@ -1,4 +1,4 @@
-package de.schmidtdevs.copilotexporter.ui
+package de.tomschmidtdev.copilotexporter.ui
 
 import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.openapi.extensions.PluginId
@@ -36,7 +36,7 @@ class ExporterToolWindowFactory : ToolWindowFactory {
         // die Plugin-Metadaten aus dem gebauten Plugin-Manifest. version ist die
         // in build.gradle.kts gesetzte Version (z.B. "1.3.0").
         val version = PluginManagerCore
-            .getPlugin(PluginId.getId("de.schmidtdevs.copilot-chat-exporter"))
+            .getPlugin(PluginId.getId("de.tomschmidtdev.copilot-chat-exporter"))
             ?.version
         if (version != null) {
             // stripeTitle = Text im seitlichen Icon-Strip der IDE

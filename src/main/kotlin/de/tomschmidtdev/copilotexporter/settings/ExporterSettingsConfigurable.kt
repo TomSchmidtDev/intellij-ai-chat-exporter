@@ -1,4 +1,4 @@
-package de.schmidtdevs.copilotexporter.settings
+package de.tomschmidtdev.copilotexporter.settings
 
 import com.intellij.openapi.options.Configurable
 import javax.swing.JComponent

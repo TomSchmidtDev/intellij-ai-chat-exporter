@@ -1,8 +1,8 @@
-package de.schmidtdevs.copilotexporter.export
+package de.tomschmidtdev.copilotexporter.export
 
-import de.schmidtdevs.copilotexporter.model.ChatMessage
-import de.schmidtdevs.copilotexporter.model.ChatSession
-import de.schmidtdevs.copilotexporter.model.Role
+import de.tomschmidtdev.copilotexporter.model.ChatMessage
+import de.tomschmidtdev.copilotexporter.model.ChatSession
+import de.tomschmidtdev.copilotexporter.model.Role
 
 /**
  * Konvertiert eine oder mehrere Chat-Sessions in valides Markdown.

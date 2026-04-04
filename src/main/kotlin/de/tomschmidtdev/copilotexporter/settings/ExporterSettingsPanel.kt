@@ -1,4 +1,4 @@
-package de.schmidtdevs.copilotexporter.settings
+package de.tomschmidtdev.copilotexporter.settings
 
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -13,7 +13,7 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.FormBuilder
 import com.intellij.util.ui.JBUI
-import de.schmidtdevs.copilotexporter.services.CopilotChatReaderService
+import de.tomschmidtdev.copilotexporter.services.CopilotChatReaderService
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.FlowLayout

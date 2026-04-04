@@ -1,4 +1,4 @@
-package de.schmidtdevs.copilotexporter.settings
+package de.tomschmidtdev.copilotexporter.settings
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service

@@ -1,4 +1,4 @@
-package de.schmidtdevs.copilotexporter.model
+package de.tomschmidtdev.copilotexporter.model
 
 /**
  * Repräsentiert eine einzelne Nachricht in einem Copilot-Chat.
