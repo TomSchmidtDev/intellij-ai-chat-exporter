@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.4.3] - 2026-04-04
+### Fixed
+- Session titles and message previews with `<`, `>`, or `&` characters now display correctly in the UI (HTML-escaped before rendering in JList)
+- Settings dialog no longer crashes when a color value in the settings file is corrupted/invalid (`Color.decode` wrapped in safe error handling)
+
+### Improved
+- Reduced memory usage when reading large Copilot databases: turn documents are now filtered lazily instead of loading the entire database into heap first
+- `diagnose()` no longer materializes the full DB just to display 3–5 sample entries
+
 ## [1.4.2] - 2026-04-04
 ### Added
 - JetBrains Marketplace publishing pipeline (signing, plugin verifier, GitHub Actions)

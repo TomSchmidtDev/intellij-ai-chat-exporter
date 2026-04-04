@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.schmidtdevs"
-version = "1.4.2"
+version = "1.4.3"
 
 kotlin {
     jvmToolchain(21)
@@ -27,6 +27,12 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.4.3</b>
+            <ul>
+                <li>Fixed: session titles and message previews with &lt;, &gt;, or &amp; now display correctly in the UI</li>
+                <li>Fixed: settings dialog no longer crashes on corrupted color values</li>
+                <li>Improved: reduced memory usage when reading large Copilot databases (lazy turn filtering)</li>
+            </ul>
             <b>1.4.2</b>
             <ul>
                 <li>Prepared for JetBrains Marketplace: improved description, signing &amp; publishing pipeline</li>

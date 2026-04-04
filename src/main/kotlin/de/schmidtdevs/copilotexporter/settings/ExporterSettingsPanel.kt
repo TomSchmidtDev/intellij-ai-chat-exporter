@@ -192,7 +192,8 @@ class ExporterSettingsPanel : JPanel() {
     fun reset() {
         val state = ExporterSettings.getInstance().state
         entries.forEach { entry ->
-            entry.panel.selectedColor = Color.decode(entry.getter(state))
+            runCatching { Color.decode(entry.getter(state)) }.getOrNull()
+                ?.let { entry.panel.selectedColor = it }
         }
         // Passendes Profil im Dropdown anzeigen (oder "Custom")
         profileCombo.selectedItem = detectProfile(state)
@@ -205,7 +206,8 @@ class ExporterSettingsPanel : JPanel() {
     /** Wendet ein Farbprofil auf alle ColorPanels an. */
     private fun applyProfile(profile: ColorProfile) {
         entries.forEach { entry ->
-            entry.panel.selectedColor = Color.decode(entry.fromProfile(profile))
+            runCatching { Color.decode(entry.fromProfile(profile)) }.getOrNull()
+                ?.let { entry.panel.selectedColor = it }
         }
     }
 

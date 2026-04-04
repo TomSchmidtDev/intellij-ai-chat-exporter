@@ -215,7 +215,7 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
         sessions.forEach { session ->
             // LERNHINWEIS: addItem(item, text, selected) – der text-Parameter
             // kann ein HTML-String sein für reiche Formatierung in der Liste.
-            val displayText = "<html><b>${truncate(session.title, 30)}</b>" +
+            val displayText = "<html><b>${truncate(session.title, 30).escapeHtml()}</b>" +
                     "<br><small>${session.formattedDate} · ${session.messageCount}</small></html>"
             sessionList.addItem(session, displayText, true)
         }
@@ -235,7 +235,7 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
 
         selectedSession.messages.sortedBy { it.index }.forEach { message ->
             val roleColor = if (message.role == Role.USER) "#6ea8fe" else "#75b798"
-            val preview = truncate(message.content.replace("\n", " "), 55)
+            val preview = truncate(message.content.replace("\n", " "), 55).escapeHtml()
             val displayText = "<html><span style='color:$roleColor'>" +
                     "<b>${message.role.displayName}:</b></span> $preview</html>"
             messageList.addItem(message, displayText, true)
@@ -350,5 +350,8 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
 
     private fun truncate(text: String, maxLen: Int): String =
         if (text.length > maxLen) text.take(maxLen - 1) + "…" else text
+
+    private fun String.escapeHtml(): String =
+        replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 }

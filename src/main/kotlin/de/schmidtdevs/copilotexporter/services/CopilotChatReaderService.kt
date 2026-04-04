@@ -123,13 +123,13 @@ class CopilotChatReaderService(private val project: Project) {
                     val sessionMap = store.openMap<NitriteId, Document>(config.sessionCollection, NitriteId::class.java, Document::class.java)
                     val turnMap = store.openMap<NitriteId, Document>(config.turnCollection, NitriteId::class.java, Document::class.java)
                     report.appendLine("  Sessions: ${sessionMap.size()}, Turns: ${turnMap.size()}")
-                    sessionMap.values().toList().take(3).forEach { doc: Document ->
+                    sessionMap.values().asSequence().take(3).forEach { doc: Document ->
                         val id = doc.get("id") as? String ?: "(no id)"
                         val title = doc.get("name.value") as? String ?: "(no title)"
                         val created = doc.get("createdAt")
                         report.appendLine("    Session: $title [$id] created=$created")
                     }
-                    turnMap.values().toList().take(5).forEach { doc: Document ->
+                    turnMap.values().asSequence().take(5).forEach { doc: Document ->
                         val sessionId = doc.get("sessionId") as? String ?: "(no sessionId)"
                         val userText = (doc.get("request.stringContent") as? String)?.take(80)
                         val deleted = doc.get("deletedAt")
@@ -241,8 +241,9 @@ class CopilotChatReaderService(private val project: Project) {
         val createdAt = (sessionDoc.get("createdAt") as? Number)?.toLong() ?: 0L
 
         // LERNHINWEIS: Nitrite 4.x hat keine serverseitige Filterabfrage über openMap().
-        // Wir filtern die Turns in-memory nach sessionId und deletedAt == null.
-        val turns = turnMap.values().toList()
+        // Wir filtern die Turns lazy per Sequence, sodass nicht-passende Dokumente
+        // nicht im Heap gehalten werden. sortedBy materialisiert nur die gefilterten Turns.
+        val turns = turnMap.values().asSequence()
             .filter { turn: Document -> turn.get("sessionId") == id && turn.get("deletedAt") == null }
             .sortedBy { turn: Document -> (turn.get("createdAt") as? Number)?.toLong() ?: 0L }
 
