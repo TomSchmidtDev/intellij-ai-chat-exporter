@@ -7,7 +7,7 @@
 // =============================================================================
 
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "2.1.0"
+    id("org.jetbrains.kotlin.jvm") version "2.1.20"
     // Das offizielle Plugin zum Bauen von IntelliJ-Plugins
     id("org.jetbrains.intellij.platform") version "2.3.0"
 }
