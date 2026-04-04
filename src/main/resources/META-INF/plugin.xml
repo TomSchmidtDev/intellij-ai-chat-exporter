@@ -1,0 +1,91 @@
+<!-- =============================================================================
+     plugin.xml – Das Herzstück jedes IntelliJ-Plugins
+
+     LERNHINWEIS: plugin.xml deklariert alle Erweiterungen (extensions) und
+     Aktionen (actions) des Plugins. Die IDE liest diese Datei beim Start und
+     registriert alle deklarierten Komponenten.
+
+     Extension Points: Vordefinierte "Haken" der IntelliJ-Platform, in die
+     Plugins ihre Implementierungen einhängen können.
+     ============================================================================= -->
+<idea-plugin>
+
+    <!-- Eindeutige Plugin-ID – muss weltweit einmalig sein (reverse domain style) -->
+    <id>de.schmidtdevs.copilot-chat-exporter</id>
+    <name>Copilot Chat Exporter</name>
+    <version>1.0.0</version>
+
+    <vendor url="https://github.com/schmidtdevs">schmidtdevs</vendor>
+
+    <description><![CDATA[
+        Exports your GitHub Copilot chat history to Markdown and HTML.<br/>
+        <br/>
+        Features:<br/>
+        <ul>
+            <li>Browse all Copilot chat sessions in a dedicated tool window</li>
+            <li>Select individual messages for partial export</li>
+            <li>Export to Markdown (.md) or styled HTML (.html)</li>
+            <li>Dark-themed HTML output with syntax-highlighted code blocks</li>
+        </ul>
+        Reads the Copilot chat database read-only — your data is never modified.
+    ]]></description>
+
+    <!--
+        LERNHINWEIS: <depends> definiert Abhängigkeiten zu anderen Plugins/Modulen.
+        com.intellij.modules.platform ist das Basismodul, das in allen JetBrains IDEs
+        verfügbar ist. Würden wir z.B. Java-Features brauchen, käme
+        com.intellij.modules.java dazu.
+    -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+
+        <!--
+            LERNHINWEIS: toolWindow registriert ein neues Panel in der IDE.
+            - id: Angezeigter Name im Tab (wird auch als stripeTitle verwendet, wenn nicht überschrieben)
+            - anchor: Wo das Panel andockt (left, right, bottom, top)
+            - factoryClass: Welche Klasse das Panel erstellt (muss ToolWindowFactory implementieren)
+            - secondary: true = standardmäßig in der sekundären (ausgeblendeten) Leiste
+        -->
+        <toolWindow
+                id="Copilot Exporter"
+                factoryClass="de.schmidtdevs.copilotexporter.ui.ExporterToolWindowFactory"
+                anchor="right"
+                secondary="true"
+                icon="/icons/pluginIcon.svg"/>
+
+        <!--
+            LERNHINWEIS: projectService registriert einen Service, der einmal pro
+            geöffnetem Projekt existiert. Der Service wird lazy instanziiert
+            (beim ersten Aufruf von project.service<MeinService>()).
+
+            Alternative: applicationService für IDE-weite Singletons,
+            oder moduleService für Modul-Ebene.
+        -->
+        <projectService
+                serviceImplementation="de.schmidtdevs.copilotexporter.services.CopilotChatReaderService"/>
+
+        <!--
+            LERNHINWEIS: applicationService registriert einen IDE-weiten Singleton.
+            Er existiert einmal für die gesamte IDE-Instanz (nicht pro Projekt)
+            und wird lazy beim ersten Zugriff über ApplicationManager.getApplication().getService()
+            instanziiert. Ideal für Einstellungen, die projektübergreifend gelten.
+        -->
+        <applicationService
+                serviceImplementation="de.schmidtdevs.copilotexporter.settings.ExporterSettings"/>
+
+        <!--
+            LERNHINWEIS: applicationConfigurable registriert eine Einstellungs-Seite
+            unter Settings > Tools. parentId="tools" bestimmt die Gruppe.
+            instance= gibt die Klasse an, die Configurable implementiert.
+            Die IDE instanziiert sie lazy beim ersten Öffnen der Settings-Seite.
+        -->
+        <applicationConfigurable
+                parentId="tools"
+                instance="de.schmidtdevs.copilotexporter.settings.ExporterSettingsConfigurable"
+                id="de.schmidtdevs.copilotexporter.settings"
+                displayName="Copilot Chat Exporter"/>
+
+    </extensions>
+
+</idea-plugin>

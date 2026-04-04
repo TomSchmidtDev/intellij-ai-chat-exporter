@@ -1,0 +1,25 @@
+# Gradle
+.gradle/
+build/
+gradle/wrapper/gradle-wrapper.jar
+
+# IntelliJ Platform Plugin cache
+.intellijPlatform/
+
+# IDE
+.idea/
+*.iml
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Kotlin
+*.class
+*.kotlin_module
+
+# Samples (lokale Test-Dateien, nicht Teil des Projekts)
+samples/
