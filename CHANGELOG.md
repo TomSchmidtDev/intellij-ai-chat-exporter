@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.4] - 2026-04-04
+### Fixed
+- Upgraded jackson-core/databind/annotations to 2.18.6 to resolve a moderate DoS vulnerability (Number Length Constraint Bypass in async parser)
+
+### Changed
+- Renamed internal package from `de.schmidtdevs` to `de.tomschmidtdev`
+
 ## [1.4.3] - 2026-04-04
 ### Fixed
 - Session titles and message previews with `<`, `>`, or `&` characters now display correctly in the UI (HTML-escaped before rendering in JList)

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.4.3"
+version = "1.4.4"
 
 kotlin {
     jvmToolchain(21)
@@ -27,6 +27,11 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.4.4</b>
+            <ul>
+                <li>Fixed: upgraded jackson-core to 2.18.6 to resolve moderate DoS vulnerability (Number Length Constraint Bypass)</li>
+                <li>Changed: renamed internal package from de.schmidtdevs to de.tomschmidtdev</li>
+            </ul>
             <b>1.4.3</b>
             <ul>
                 <li>Fixed: session titles and message previews with &lt;, &gt;, or &amp; now display correctly in the UI</li>
