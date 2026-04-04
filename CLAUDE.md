@@ -51,6 +51,33 @@ Agent and edit-mode responses are triple-nested JSON stored in `response.content
 - Inner (AgentRound): `{ "roundId": N, "reply": "<text>", "toolCalls": [...] }` → take highest roundId
 - Inner (Markdown): `{ "text": "<text>" }`
 
+## Dependency license policy
+
+Whenever a dependency is added or updated in `build.gradle.kts`, do the following **before committing**:
+
+1. Run `./gradlew dependencies --configuration runtimeClasspath` to list all transitive dependencies.
+2. Verify each **bundled** dependency's license via Maven Central (`https://central.sonatype.com/artifact/<group>/<artifact>/<version>`).
+3. Skip IDE-provided dependencies — `kotlin-stdlib` and `org.jetbrains:annotations` are provided by the IntelliJ Platform and do not need NOTICE entries.
+4. Update both `NOTICE` and `src/main/resources/NOTICE` (keep them in sync) using this format:
+
+```
+--------------------------------------------------------------------------------
+<Library Name> (<URL>)
+Copyright <year> <author>.
+Licensed under <License Name> (<SPDX-ID>).
+
+  <group>:<artifact>:<version>
+
+A copy of the <License Name> is available at:
+  <URL>
+--------------------------------------------------------------------------------
+```
+
+5. Flag non-permissive licenses before proceeding:
+   - **Copyleft** (GPL, LGPL, AGPL): may require source disclosure — escalate to the developer
+   - **Weak copyleft** (MPL, EPL): allowed if the library is unmodified — note dual-license options
+   - **Permissive** (Apache-2.0, MIT, BSD): allowed, attribution required in NOTICE
+
 ## Versioning strategy
 - Patch version: each build
 - Minor version: new feature

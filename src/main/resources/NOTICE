@@ -1,0 +1,72 @@
+Copilot Chat Exporter
+Copyright 2026 TomSchmidtDev
+
+This product includes software developed by third parties:
+
+--------------------------------------------------------------------------------
+Nitrite Java (https://github.com/nitrite/nitrite-java)
+Copyright 2017-2024 the original author or authors.
+Licensed under the Apache License, Version 2.0 (Apache-2.0).
+
+  org.dizitart:nitrite:4.3.0
+  org.dizitart:nitrite-mvstore-adapter:4.3.0
+  org.dizitart:nitrite-jackson-mapper:4.3.0
+
+A copy of the Apache License, Version 2.0 is available at:
+  http://www.apache.org/licenses/LICENSE-2.0
+
+--------------------------------------------------------------------------------
+H2 MVStore (https://h2database.com)
+Copyright 2004-2024 H2 Group.
+Dual-licensed under the Eclipse Public License 1.0 (EPL-1.0) and the
+Mozilla Public License 2.0 (MPL-2.0). Used here under MPL-2.0.
+
+  com.h2database:h2-mvstore:2.2.224
+
+A copy of the Mozilla Public License 2.0 is available at:
+  https://www.mozilla.org/en-US/MPL/2.0/
+A copy of the Eclipse Public License 1.0 is available at:
+  https://www.eclipse.org/legal/epl-v10.html
+
+--------------------------------------------------------------------------------
+Jackson (https://github.com/FasterXML/jackson)
+Copyright 2007-2024 FasterXML.
+Licensed under the Apache License, Version 2.0 (Apache-2.0).
+
+  com.fasterxml.jackson.core:jackson-databind:2.17.1
+  com.fasterxml.jackson.core:jackson-annotations:2.17.1
+  com.fasterxml.jackson.core:jackson-core:2.17.1
+
+A copy of the Apache License, Version 2.0 is available at:
+  http://www.apache.org/licenses/LICENSE-2.0
+
+--------------------------------------------------------------------------------
+SLF4J (https://www.slf4j.org)
+Copyright 2004-2024 QOS.ch Sarl.
+Licensed under the MIT License (MIT).
+
+  org.slf4j:slf4j-api:2.0.13
+
+A copy of the MIT License is available at:
+  https://opensource.org/licenses/MIT
+
+--------------------------------------------------------------------------------
+Jasypt (http://www.jasypt.org)
+Copyright 2007-2012 Jasypt team.
+Licensed under the Apache License, Version 2.0 (Apache-2.0).
+
+  org.jasypt:jasypt:1.9.3
+
+A copy of the Apache License, Version 2.0 is available at:
+  http://www.apache.org/licenses/LICENSE-2.0
+
+--------------------------------------------------------------------------------
+Apache Commons Codec (https://commons.apache.org/proper/commons-codec/)
+Copyright 2002-2024 The Apache Software Foundation.
+Licensed under the Apache License, Version 2.0 (Apache-2.0).
+
+  commons-codec:commons-codec:1.17.0
+
+A copy of the Apache License, Version 2.0 is available at:
+  http://www.apache.org/licenses/LICENSE-2.0
+--------------------------------------------------------------------------------

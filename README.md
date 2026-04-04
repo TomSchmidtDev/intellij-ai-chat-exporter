@@ -42,6 +42,10 @@ Or install manually via **Settings → Plugins → Install Plugin from Disk** us
 - JetBrains IDE 2024.1 or later
 - GitHub Copilot plugin installed and at least one chat session recorded
 
+## Privacy
+
+This plugin does not collect, transmit, or store any personal data. All operations are performed locally on your machine. No telemetry, analytics, or network requests are made.
+
 ## License
 
 Business Source License 1.1 — free for personal, non-commercial, and internal business use. Converts to Apache 2.0 on 2031-04-04. See [LICENSE.md](LICENSE.md) for details.

@@ -42,6 +42,10 @@ Oder installiere es manuell über **Einstellungen → Plugins → Plugin von Dat
 - JetBrains-IDE 2024.1 oder neuer
 - GitHub Copilot-Plugin installiert und mindestens eine Chat-Sitzung aufgezeichnet
 
+## Datenschutz
+
+Dieses Plugin erfasst, überträgt oder speichert keinerlei personenbezogene Daten. Alle Operationen werden lokal auf deinem Gerät ausgeführt. Es werden keine Telemetrie-, Analyse- oder Netzwerkanfragen durchgeführt.
+
 ## Lizenz
 
 Business Source License 1.1 — kostenlos für private und nicht-kommerzielle Nutzung sowie den internen Einsatz in Unternehmen. Wird am 2031-04-04 automatisch zur Apache 2.0. Details in [LICENSE.md](LICENSE.md).
