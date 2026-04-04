@@ -1,5 +1,7 @@
 # Copilot Chat Exporter
 
+> [Deutsche Version](README.de.md)
+
 An IntelliJ plugin that lets you export your **GitHub Copilot chat history** to Markdown or styled HTML — directly from your IDE.
 
 ![Plugin Panel](plugin-panel.png)
@@ -42,4 +44,4 @@ Or install manually via **Settings → Plugins → Install Plugin from Disk** us
 
 ## License
 
-Business Source License 1.1 — free for personal and non-commercial use. Converts to Apache 2.0 on 2031-04-04. See [LICENSE.md](LICENSE.md) for details.
+Business Source License 1.1 — free for personal, non-commercial, and internal business use. Converts to Apache 2.0 on 2031-04-04. See [LICENSE.md](LICENSE.md) for details.

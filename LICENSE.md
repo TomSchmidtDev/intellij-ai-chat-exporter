@@ -6,7 +6,7 @@
 |---|---|
 | **Licensor** | TomSchmidtDev |
 | **Licensed Work** | Copilot Chat Exporter (© 2026 TomSchmidtDev) |
-| **Additional Use Grant** | You may use the Licensed Work free of charge for personal, non-commercial purposes and via installation through the JetBrains Marketplace. Commercial use, resale, or redistribution as part of a commercial product or service requires a separate commercial license from the Licensor. |
+| **Additional Use Grant** | You may use the Licensed Work free of charge for personal, non-commercial, and internal business purposes, including installation through the JetBrains Marketplace or direct installation within your organization. Resale, sublicensing, or redistribution of the Licensed Work (modified or unmodified) as part of a commercial product or service requires a separate commercial license from the Licensor. |
 | **Change Date** | 2031-04-04 |
 | **Change License** | Apache License, Version 2.0 |
 
@@ -24,7 +24,7 @@ Effective on the Change Date, or the fifth anniversary of the first publicly ava
 Subject to the terms and conditions of this License, the Licensor hereby grants to you a non-exclusive, worldwide, royalty-free copyright license to copy, modify, create derivative works of, redistribute, and otherwise use the Licensed Work for non-production purposes and as permitted by the Additional Use Grant above. The Licensor will not be liable to you for any damages of any kind.
 
 **Additional Use Grant.**
-As stated in the Parameters above, you may use the Licensed Work free of charge for personal, non-commercial purposes and via installation through the JetBrains Marketplace. Any other commercial use — including but not limited to incorporating the Licensed Work into a commercial product, offering it as a paid service, or redistributing it for a fee — requires prior written permission from the Licensor.
+As stated in the Parameters above, you may use the Licensed Work free of charge for personal, non-commercial, and internal business purposes, including installation through the JetBrains Marketplace or direct installation within your organization. Any form of resale, sublicensing, or redistribution — including but not limited to incorporating the Licensed Work into a commercial product, offering it as a paid service, or distributing modified or unmodified versions for a fee — requires prior written permission from the Licensor.
 
 **Change Date.**
 On the Change Date (2031-04-04), this License automatically converts to the Change License (Apache License 2.0). From that date forward, the Licensed Work is governed solely by the Apache License 2.0.
@@ -39,7 +39,7 @@ You may create derivative works of the Licensed Work solely for personal or non-
 This License does not grant permission to use the Licensor's name, trademarks, service marks, or logos, except as required for reasonable and customary use in describing the origin of the Licensed Work.
 
 **Disclaimer of Warranty.**
-THE LICENSED WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE LICENSED WORK OR THE USE OR OTHER DEALINGS IN THE LICENSED WORK.
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE LICENSED WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE LICENSED WORK OR THE USE OR OTHER DEALINGS IN THE LICENSED WORK.
 
 ---
 
