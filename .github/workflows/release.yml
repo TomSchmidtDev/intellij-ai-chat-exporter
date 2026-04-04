@@ -1,10 +1,13 @@
 name: Release
 
-# Trigger: push a version tag, e.g.  git tag v1.4.2 && git push origin v1.4.2
+# Trigger: push a version tag, e.g.:
+#   git tag v1.4.3 && git push origin v1.4.3                   → GitHub Release + Marketplace
+#   git tag v1.4.3-preview && git push origin v1.4.3-preview   → GitHub Release only
 on:
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-preview'
 
 permissions:
   contents: write   # needed to create GitHub Releases
@@ -52,7 +55,9 @@ jobs:
       #
       # IMPORTANT: The very first upload must be done manually via the Marketplace UI.
       # Subsequent versions can be published automatically with this step.
+      # Skipped for -preview tags (GitHub-only releases).
       - name: Publish to JetBrains Marketplace
+        if: ${{ !endsWith(github.ref, '-preview') }}
         env:
           PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
         run: ./gradlew publishPlugin
@@ -65,3 +70,4 @@ jobs:
         with:
           files: build/distributions/*.zip
           generate_release_notes: true
+          prerelease: ${{ endsWith(github.ref, '-preview') }}
