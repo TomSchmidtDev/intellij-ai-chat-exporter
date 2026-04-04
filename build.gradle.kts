@@ -112,4 +112,18 @@ dependencies {
     implementation("org.dizitart:nitrite:4.3.0")
     implementation("org.dizitart:nitrite-mvstore-adapter:4.3.0")
     implementation("org.dizitart:nitrite-jackson-mapper:4.3.0")
+
+    // Force jackson >= 2.18.6 to fix CVE: Number Length Constraint Bypass (moderate DoS).
+    // jackson 2.17.1 (pulled in transitively by nitrite-jackson-mapper) is vulnerable.
+    constraints {
+        implementation("com.fasterxml.jackson.core:jackson-core:2.18.6") {
+            because("jackson-core < 2.18.6 is vulnerable to a DoS via async parser (GitHub advisory)")
+        }
+        implementation("com.fasterxml.jackson.core:jackson-databind:2.18.6") {
+            because("align jackson-databind with forced jackson-core version")
+        }
+        implementation("com.fasterxml.jackson.core:jackson-annotations:2.18.6") {
+            because("align jackson-annotations with forced jackson-core version")
+        }
+    }
 }

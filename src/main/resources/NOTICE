@@ -33,9 +33,9 @@ Jackson (https://github.com/FasterXML/jackson)
 Copyright 2007-2024 FasterXML.
 Licensed under the Apache License, Version 2.0 (Apache-2.0).
 
-  com.fasterxml.jackson.core:jackson-databind:2.17.1
-  com.fasterxml.jackson.core:jackson-annotations:2.17.1
-  com.fasterxml.jackson.core:jackson-core:2.17.1
+  com.fasterxml.jackson.core:jackson-databind:2.18.6
+  com.fasterxml.jackson.core:jackson-annotations:2.18.6
+  com.fasterxml.jackson.core:jackson-core:2.18.6
 
 A copy of the Apache License, Version 2.0 is available at:
   http://www.apache.org/licenses/LICENSE-2.0
