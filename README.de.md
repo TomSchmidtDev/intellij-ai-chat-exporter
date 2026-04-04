@@ -4,7 +4,7 @@
 
 Ein IntelliJ-Plugin, mit dem du deine **GitHub Copilot-Chatverläufe** direkt aus der IDE heraus als Markdown oder gestyltes HTML exportieren kannst.
 
-![Plugin Panel](plugin-panel.png)
+![Plugin Panel](screenshots/plugin-panel.png)
 
 ## Funktionen
 
@@ -18,7 +18,7 @@ Ein IntelliJ-Plugin, mit dem du deine **GitHub Copilot-Chatverläufe** direkt au
 
 ## Einstellungen
 
-![Plugin Settings](plugin-settings.png)
+![Plugin Settings](screenshots/plugin-settings.png)
 
 Öffne **Einstellungen → Tools → Copilot Chat Exporter**, um das HTML-Farbprofil zu konfigurieren. Wähle aus 10 Voreinstellungen oder passe jede Farbe individuell an.
 

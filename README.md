@@ -4,7 +4,7 @@
 
 An IntelliJ plugin that lets you export your **GitHub Copilot chat history** to Markdown or styled HTML — directly from your IDE.
 
-![Plugin Panel](plugin-panel.png)
+![Plugin Panel](screenshots/plugin-panel.png)
 
 ## Features
 
@@ -18,7 +18,7 @@ An IntelliJ plugin that lets you export your **GitHub Copilot chat history** to 
 
 ## Settings
 
-![Plugin Settings](plugin-settings.png)
+![Plugin Settings](screenshots/plugin-settings.png)
 
 Open **Settings → Tools → Copilot Chat Exporter** to configure the HTML color profile. Choose from 10 presets or customize each color individually.
 
