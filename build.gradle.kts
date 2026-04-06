@@ -98,6 +98,10 @@ intellijPlatform {
     }
 }
 
+tasks.test {
+    useJUnitPlatform()
+}
+
 repositories {
     mavenCentral()
     intellijPlatform {
@@ -117,6 +121,9 @@ dependencies {
     implementation("org.dizitart:nitrite:4.3.0")
     implementation("org.dizitart:nitrite-mvstore-adapter:4.3.0")
     implementation("org.dizitart:nitrite-jackson-mapper:4.3.0")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // Force jackson >= 2.18.6 to fix CVE: Number Length Constraint Bypass (moderate DoS).
     // jackson 2.17.1 (pulled in transitively by nitrite-jackson-mapper) is vulnerable.

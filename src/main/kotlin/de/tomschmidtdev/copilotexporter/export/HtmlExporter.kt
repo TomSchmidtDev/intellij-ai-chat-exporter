@@ -18,12 +18,14 @@ object HtmlExporter {
      *
      * @param sessions         Die zu exportierenden Sessions
      * @param selectedMessages Optionale Filterung – wie in MarkdownExporter
+     * @param colors           Farbschema; Standard: aktuelle IDE-Einstellungen
      */
     fun export(
         sessions: List<ChatSession>,
         selectedMessages: Map<String, Set<Int>>? = null,
+        colors: ExporterSettings.State = ExporterSettings.getInstance().state,
     ): String = buildString {
-        appendLine(htmlHeader())
+        appendLine(htmlHeader(colors))
         appendLine("<body>")
         appendLine("""  <div class="container">""")
         appendLine("""    <h1 class="page-title">Copilot Chat Export</h1>""")
@@ -139,8 +141,7 @@ object HtmlExporter {
      * gelesen (nicht beim Laden des Exporters). So wirken Einstellungsänderungen
      * sofort beim nächsten Export ohne IDE-Neustart.
      */
-    private fun htmlHeader(): String {
-        val c = ExporterSettings.getInstance().state
+    private fun htmlHeader(c: ExporterSettings.State): String {
         return """
         <!DOCTYPE html>
         <html lang="en">
