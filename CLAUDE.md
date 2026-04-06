@@ -4,7 +4,7 @@
 An IntelliJ Platform plugin that reads GitHub Copilot chat history from its local Nitrite 4.x database and exports it to Markdown or styled HTML. The plugin is read-only — it never modifies Copilot data.
 
 ## Build requirements
-- **Java 21** is required (Java 25 breaks the IntelliJ Platform Gradle Plugin 2.x)
+- **Java 21** is required (matches JetBrains Runtime 21 bundled in IntelliJ 2025.1+)
 - On macOS, if multiple Java versions are installed:
   ```bash
   export JAVA_HOME=$(/usr/libexec/java_home -v 21)

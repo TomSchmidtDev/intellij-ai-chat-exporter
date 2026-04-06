@@ -39,7 +39,7 @@ Oder installiere es manuell über **Einstellungen → Plugins → Plugin von Dat
 
 ## Voraussetzungen
 
-- JetBrains-IDE 2024.1 oder neuer
+- JetBrains-IDE 2025.1 oder neuer
 - GitHub Copilot-Plugin installiert und mindestens eine Chat-Sitzung aufgezeichnet
 
 ## Datenschutz

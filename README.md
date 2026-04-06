@@ -39,7 +39,7 @@ Or install manually via **Settings → Plugins → Install Plugin from Disk** us
 
 ## Requirements
 
-- JetBrains IDE 2024.1 or later
+- JetBrains IDE 2025.1 or later
 - GitHub Copilot plugin installed and at least one chat session recorded
 
 ## Privacy
