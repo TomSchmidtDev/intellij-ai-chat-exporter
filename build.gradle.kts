@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.4.5"
+version = "1.4.6"
 
 kotlin {
     jvmToolchain(21)
@@ -57,7 +57,7 @@ intellijPlatform {
 
         ideaVersion {
             sinceBuild = "251"   // IntelliJ IDEA 2025.1+
-            untilBuild = ""      // No upper limit — compatible with all future builds
+            // untilBuild not set → no upper limit, compatible with all future builds
         }
 
         vendor {
