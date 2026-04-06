@@ -212,12 +212,12 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
             return
         }
 
-        sessions.forEach { session ->
+        sessions.forEachIndexed { index, session ->
             // LERNHINWEIS: addItem(item, text, selected) – der text-Parameter
             // kann ein HTML-String sein für reiche Formatierung in der Liste.
             val displayText = "<html><b>${truncate(session.title, 30).escapeHtml()}</b>" +
                     "<br><small>${session.formattedDate} · ${session.messageCount}</small></html>"
-            sessionList.addItem(session, displayText, true)
+            sessionList.addItem(session, displayText, index == 0)
         }
 
         setStatus("${sessions.size} session${if (sessions.size != 1) "s" else ""} found.")
