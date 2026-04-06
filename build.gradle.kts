@@ -9,12 +9,12 @@ version = "1.4.4"
 kotlin {
     jvmToolchain(21)
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
     }
 }
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 intellijPlatform {
@@ -56,7 +56,7 @@ intellijPlatform {
         """.trimIndent()
 
         ideaVersion {
-            sinceBuild = "241"   // IntelliJ IDEA 2024.1+
+            sinceBuild = "251"   // IntelliJ IDEA 2025.1+
             untilBuild = ""      // No upper limit — compatible with all future builds
         }
 
