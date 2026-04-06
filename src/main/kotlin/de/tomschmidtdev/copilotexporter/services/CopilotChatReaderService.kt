@@ -6,7 +6,6 @@ import com.intellij.openapi.project.Project
 import de.tomschmidtdev.copilotexporter.model.ChatMessage
 import de.tomschmidtdev.copilotexporter.model.ChatSession
 import de.tomschmidtdev.copilotexporter.model.Role
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.dizitart.no2.Nitrite
 import org.dizitart.no2.collection.Document
 import org.dizitart.no2.collection.NitriteId
@@ -42,7 +41,6 @@ import java.nio.file.Files
 class CopilotChatReaderService(private val project: Project) {
 
     private val log = logger<CopilotChatReaderService>()
-    private val objectMapper = ObjectMapper()
 
     // -------------------------------------------------------------------------
     // Mapping: Session-Typ → Dateiname, Session-Collection, Turn-Collection
@@ -271,7 +269,7 @@ class CopilotChatReaderService(private val project: Project) {
         // Direkter Text-Inhalt (Chat-Modus)
         (turn.get("request.stringContent") as? String)?.takeIf { it.isNotBlank() }?.let { return it }
         // Agent/Edit-Modus: komplexes JSON
-        (turn.get("request.contents") as? String)?.takeIf { it.isNotBlank() }?.let { return parseAgentContents(it) }
+        (turn.get("request.contents") as? String)?.takeIf { it.isNotBlank() }?.let { return CopilotJsonParser.parseAgentContents(it) }
         return null
     }
 
@@ -279,80 +277,8 @@ class CopilotChatReaderService(private val project: Project) {
         // Direkter Text-Inhalt (Chat-Modus)
         (turn.get("response.stringContent") as? String)?.takeIf { it.isNotBlank() }?.let { return it }
         // Agent/Edit-Modus: komplexes JSON
-        (turn.get("response.contents") as? String)?.takeIf { it.isNotBlank() }?.let { return parseAgentContents(it) }
+        (turn.get("response.contents") as? String)?.takeIf { it.isNotBlank() }?.let { return CopilotJsonParser.parseAgentContents(it) }
         return null
-    }
-
-    /**
-     * Extrahiert den Antwort-Text aus dem dreifach-verschachtelten JSON von Agent/Edit-Nachrichten.
-     *
-     * Variante A – Agent-Modus:
-     *   Ebene 1: { "<uuid>": { "type": "Value", "value": "<json-string>" } }
-     *   Ebene 2: { "type": "AgentRound", "data": "<json-string>" }
-     *   Ebene 3: { "roundId": N, "reply": "<antworttext>", "toolCalls": [...] }
-     *   → Wir nehmen den "reply" der Round mit der höchsten roundId.
-     *
-     * Variante B – Markdown:
-     *   Ebene 2: { "type": "Markdown", "data": "<json-string>" }
-     *   Ebene 3: { "text": "<markdown-text>", "annotations": [...] }
-     *
-     * Variante C – Subgraph (neuere Agent-Sessions):
-     *   Ebene 1: { "__first__": { "type": "Subgraph", "value": "<json-string>" }, "__last__": ... }
-     *   → "value" enthält wieder ein UUID→Value-Objekt derselben Struktur → rekursiv verarbeiten.
-     *
-     * "Steps"- und "References"-Einträge werden ignoriert.
-     */
-    private fun parseAgentContents(contents: String): String {
-        return try {
-            val outerNode = objectMapper.readTree(contents)
-            if (!outerNode.isObject) return contents
-
-            val rounds = mutableListOf<Pair<Int, String>>()
-            val markdownTexts = mutableListOf<String>()
-
-            fun processEntries(node: com.fasterxml.jackson.databind.JsonNode) {
-                node.fields().forEach { (_, entry) ->
-                    val entryType = entry.get("type")?.asText() ?: return@forEach
-                    val valueStr = entry.get("value")?.asText() ?: return@forEach
-
-                    when (entryType) {
-                        "Subgraph" -> {
-                            val subNode = runCatching { objectMapper.readTree(valueStr) }.getOrNull() ?: return@forEach
-                            if (subNode.isObject) processEntries(subNode)
-                        }
-                        "Value" -> {
-                            val middle = runCatching { objectMapper.readTree(valueStr) }.getOrNull() ?: return@forEach
-                            val type = middle.get("type")?.asText() ?: return@forEach
-                            val dataStr = middle.get("data")?.asText() ?: return@forEach
-                            when (type) {
-                                "AgentRound" -> {
-                                    val inner = runCatching { objectMapper.readTree(dataStr) }.getOrNull() ?: return@forEach
-                                    val reply = inner.get("reply")?.asText() ?: return@forEach
-                                    val roundId = inner.get("roundId")?.asInt() ?: 0
-                                    if (reply.isNotBlank()) rounds.add(roundId to reply)
-                                }
-                                "Markdown" -> {
-                                    val inner = runCatching { objectMapper.readTree(dataStr) }.getOrNull() ?: return@forEach
-                                    val text = inner.get("text")?.asText() ?: return@forEach
-                                    if (text.isNotBlank()) markdownTexts.add(text)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            processEntries(outerNode)
-
-            when {
-                rounds.isNotEmpty() -> rounds.maxByOrNull { it.first }!!.second
-                markdownTexts.isNotEmpty() -> markdownTexts.joinToString("\n\n")
-                else -> contents
-            }
-        } catch (e: Exception) {
-            log.warn("Failed to parse agent contents: ${e.message}")
-            contents
-        }
     }
 
     // -------------------------------------------------------------------------

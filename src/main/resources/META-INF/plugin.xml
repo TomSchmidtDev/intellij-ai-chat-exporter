@@ -3,7 +3,7 @@
     <id>de.tomschmidtdev.copilot-chat-exporter</id>
     <name>Copilot Chat Exporter</name>
 
-    <vendor url="https://github.com/TomSchmidtDev">schmidtdevs</vendor>
+    <vendor url="https://github.com/TomSchmidtDev">TomSchmidtDev</vendor>
 
     <description><![CDATA[
         Export your GitHub Copilot chat history to Markdown or styled HTML, right from your IDE.

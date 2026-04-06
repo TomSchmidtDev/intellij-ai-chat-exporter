@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.4.4"
+version = "1.4.5"
 
 kotlin {
     jvmToolchain(21)
@@ -61,7 +61,7 @@ intellijPlatform {
         }
 
         vendor {
-            name = "schmidtdevs"
+            name = "TomSchmidtDev"
             url = "https://github.com/TomSchmidtDev"
         }
     }
