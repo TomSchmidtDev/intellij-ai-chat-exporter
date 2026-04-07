@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.4.6"
+version = "1.5.0"
 
 kotlin {
     jvmToolchain(21)
@@ -27,6 +27,12 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.5.0</b>
+            <ul>
+                <li>Added: plugin logo displayed in the JetBrains Marketplace and IDE plugin list</li>
+                <li>Added: preview panel header now shows the title of the currently selected session</li>
+                <li>Added: toggle buttons to select/deselect all user prompts or all Copilot responses in one click</li>
+            </ul>
             <b>1.4.4</b>
             <ul>
                 <li>Fixed: upgraded jackson-core to 2.18.6 to resolve moderate DoS vulnerability (Number Length Constraint Bypass)</li>

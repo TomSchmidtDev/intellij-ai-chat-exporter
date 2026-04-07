@@ -53,6 +53,9 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
     // -------------------------------------------------------------------------
     private var sessions: List<ChatSession> = emptyList()
 
+    /** Nachrichten der aktuell angezeigten Session, sortiert nach Index. */
+    private var currentMessages: List<ChatMessage> = emptyList()
+
     // -------------------------------------------------------------------------
     // UI-Komponenten
     // -------------------------------------------------------------------------
@@ -66,6 +69,11 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
 
     /** Rechte Seite: Nachrichten der ausgewählten Session mit Checkboxen */
     private val messageList = CheckBoxList<ChatMessage>()
+
+    private val previewLabel = JBLabel("Preview").apply {
+        border = JBUI.Borders.empty(6, 8, 4, 8)
+        font = font.deriveFont(java.awt.Font.BOLD)
+    }
 
     private val statusLabel = JBLabel("Loading…").apply {
         foreground = JBUI.CurrentTheme.Label.disabledForeground()
@@ -143,12 +151,30 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
             add(JBScrollPane(sessionList), BorderLayout.CENTER)
         }
 
+        // --- Toggle-Buttons unterhalb des Preview-Titels ---
+        val togglePanel = JPanel(FlowLayout(FlowLayout.LEFT, 4, 2)).apply {
+            add(JButton("Prompts", AllIcons.General.User).apply {
+                toolTipText = "Select / deselect all user prompts"
+                addActionListener { toggleRoleSelection(Role.USER) }
+            })
+            add(JButton("Copilot", AllIcons.Actions.Preview).apply {
+                toolTipText = "Select / deselect all Copilot responses"
+                addActionListener { toggleRoleSelection(Role.ASSISTANT) }
+            })
+        }
+
+        val previewHeader = JPanel(BorderLayout()).apply {
+            border = BorderFactory.createMatteBorder(
+                0, 0, 1, 0,
+                JBUI.CurrentTheme.CustomFrameDecorations.separatorForeground()
+            )
+            add(previewLabel, BorderLayout.NORTH)
+            add(togglePanel, BorderLayout.SOUTH)
+        }
+
         // --- Message-Panel (rechts) ---
         val messagePanel = JPanel(BorderLayout()).apply {
-            add(JBLabel("Preview").apply {
-                border = JBUI.Borders.empty(6, 8, 4, 8)
-                font = font.deriveFont(java.awt.Font.BOLD)
-            }, BorderLayout.NORTH)
+            add(previewHeader, BorderLayout.NORTH)
             add(JBScrollPane(messageList), BorderLayout.CENTER)
         }
 
@@ -230,15 +256,27 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
 
     /** Aktualisiert die rechte Message-Liste anhand der links ausgewählten Session. */
     private fun updateMessagePreview() {
-        messageList.clear()
         val selectedSession = getSelectedSessionFromList() ?: return
 
-        selectedSession.messages.sortedBy { it.index }.forEach { message ->
+        val title = truncate(selectedSession.title, 50).escapeHtml()
+        previewLabel.text = "<html><b>Preview</b> <span style='color:gray; font-weight:normal'>&mdash; $title</span></html>"
+
+        currentMessages = selectedSession.messages.sortedBy { it.index }
+        rebuildMessageList(BooleanArray(currentMessages.size) { true })
+    }
+
+    /**
+     * Baut die messageList komplett neu auf.
+     * Ein einziger Durchlauf verhindert das O(n²)-Problem von setItemSelected.
+     */
+    private fun rebuildMessageList(checkedStates: BooleanArray) {
+        messageList.clear()
+        currentMessages.forEachIndexed { i, message ->
             val roleColor = if (message.role == Role.USER) "#6ea8fe" else "#75b798"
             val preview = truncate(message.content.replace("\n", " "), 55).escapeHtml()
             val displayText = "<html><span style='color:$roleColor'>" +
                     "<b>${message.role.displayName}:</b></span> $preview</html>"
-            messageList.addItem(message, displayText, true)
+            messageList.addItem(message, displayText, checkedStates.getOrElse(i) { true })
         }
     }
 
@@ -346,6 +384,26 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
 
     private fun setStatus(text: String) {
         SwingUtilities.invokeLater { statusLabel.text = text }
+    }
+
+    /**
+     * Selektiert alle Nachrichten der gegebenen Rolle, falls nicht alle ausgewählt sind;
+     * deselektiert sie, wenn bereits alle ausgewählt sind.
+     *
+     * Statt setItemSelected pro Item (O(n²)) werden die Zustände einmalig gelesen,
+     * geändert und die Liste in einem einzigen Durchlauf neu aufgebaut.
+     */
+    private fun toggleRoleSelection(role: Role) {
+        if (currentMessages.isEmpty()) return
+        val roleIndices = currentMessages.indices.filter { currentMessages[it].role == role }
+        if (roleIndices.isEmpty()) return
+
+        val checkedStates = BooleanArray(currentMessages.size) { messageList.isItemSelected(it) }
+        val allSelected = roleIndices.all { checkedStates[it] }
+        val newState = !allSelected
+        roleIndices.forEach { checkedStates[it] = newState }
+
+        rebuildMessageList(checkedStates)
     }
 
     private fun truncate(text: String, maxLen: Int): String =

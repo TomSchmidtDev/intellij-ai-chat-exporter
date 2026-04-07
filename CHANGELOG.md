@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.0] - 2026-04-07
+### Added
+- Plugin logo (40×40 SVG) displayed in the JetBrains Marketplace and IDE plugin list
+- Preview panel header now shows the title of the currently selected session
+- Two toggle buttons below the preview title to select/deselect all user prompts or all Copilot responses in one click
+
 ## [1.4.4] - 2026-04-04
 ### Fixed
 - Upgraded jackson-core/databind/annotations to 2.18.6 to resolve a moderate DoS vulnerability (Number Length Constraint Bypass in async parser)

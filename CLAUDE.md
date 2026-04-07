@@ -79,9 +79,24 @@ A copy of the <License Name> is available at:
    - **Permissive** (Apache-2.0, MIT, BSD): allowed, attribution required in NOTICE
 
 ## Versioning strategy
-- Patch version: each build
-- Minor version: new feature
+- Patch version: each build / bug fix / refactor
+- Minor version: new user-visible feature
 - Major version: breaking change or new minimum IntelliJ version requirement
+
+When bumping a version, always update **all three** in the same commit:
+1. `build.gradle.kts` → `version = "X.Y.Z"`
+2. `CHANGELOG.md` → new `## [X.Y.Z] - YYYY-MM-DD` section
+3. `build.gradle.kts` → `changeNotes` block (shown on JetBrains Marketplace "What's New" tab)
+
+## Plugin icon
+- Tool window icon (13×13): `src/main/resources/icons/pluginIcon.svg` — speech-bubble style
+- Marketplace / IDE plugin list icon (40×40): `src/main/resources/META-INF/pluginIcon.svg` — document + brain badge
+
+## UI conventions (ExporterPanel)
+- All UI is built with standard Swing + JetBrains `com.intellij.ui.*` components.
+- Long-running work (DB reads, exports) runs via `Task.Backgroundable`; never block the EDT.
+- `CheckBoxList<T>` — use `addItem(item, text, selected)` to populate; HTML strings are supported as display text.
+- **Avoid calling `setItemSelected` in a loop** — it does an O(n) model scan per call (→ O(n²) total). Instead, read all checked states into a `BooleanArray`, modify it, then rebuild the list with `clear()` + `addItem` in one pass.
 
 ## Repository
 https://github.com/TomSchmidtDev/intellij-ai-chat-exporter
