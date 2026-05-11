@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.5.1"
+version = "1.5.2"
 
 kotlin {
     jvmToolchain(21)
@@ -27,6 +27,11 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.5.2</b>
+            <ul>
+                <li>Changed: session list now shows and sorts by last-modified date (timestamp of the most recent turn) instead of creation date</li>
+                <li>Added: hovering over a message in the preview shows a tooltip with its timestamp and up to 10 lines of content</li>
+            </ul>
             <b>1.5.1</b>
             <ul>
                 <li>Fixed: diagnostic no longer truncates session and turn lists (previously capped at 3 sessions / 5 turns per database)</li>

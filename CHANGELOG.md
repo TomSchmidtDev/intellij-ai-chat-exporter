@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.2] - 2026-05-11
+### Changed
+- Session list now shows and sorts by last-modified date (timestamp of the most recent turn) instead of the session creation date
+
+### Added
+- Hovering over a message in the preview panel shows a tooltip with the message timestamp and up to 10 lines of content
+
 ## [1.5.1] - 2026-05-11
 ### Fixed
 - Diagnostic no longer truncates session and turn lists (previously capped at 3 sessions / 5 turns per database file)

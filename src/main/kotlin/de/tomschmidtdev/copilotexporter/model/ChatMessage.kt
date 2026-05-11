@@ -11,6 +11,7 @@ data class ChatMessage(
     val role: Role,
     val content: String,
     val index: Int,
+    val timestamp: Long = 0L,
 )
 
 /**

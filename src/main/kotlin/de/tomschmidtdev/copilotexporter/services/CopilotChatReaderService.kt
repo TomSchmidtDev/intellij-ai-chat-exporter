@@ -88,7 +88,7 @@ class CopilotChatReaderService(private val project: Project) {
         }
         return dbFiles.flatMap { (dbFile, config) ->
             readNitriteDb(dbFile, config)
-        }.sortedByDescending { it.createdAt }
+        }.sortedByDescending { if (it.lastModifiedAt > 0L) it.lastModifiedAt else it.createdAt }
     }
 
     fun diagnose(): DiagnosticReport {
@@ -279,17 +279,21 @@ class CopilotChatReaderService(private val project: Project) {
         val messages = mutableListOf<ChatMessage>()
         var index = 0
         var turnCount = 0
+        var lastModifiedAt = 0L
 
         turns.forEach { turn ->
             turnCount++
+            val turnTs = (turn.get("createdAt") as? Number)?.toLong() ?: 0L
+            if (turnTs > lastModifiedAt) lastModifiedAt = turnTs
+
             val userText = extractUserText(turn)
             val assistantText = extractAssistantText(turn)
 
             if (!userText.isNullOrBlank()) {
-                messages.add(ChatMessage(Role.USER, userText, index++))
+                messages.add(ChatMessage(Role.USER, userText, index++, turnTs))
             }
             if (!assistantText.isNullOrBlank()) {
-                messages.add(ChatMessage(Role.ASSISTANT, assistantText, index++))
+                messages.add(ChatMessage(Role.ASSISTANT, assistantText, index++, turnTs))
             }
         }
 
@@ -300,7 +304,7 @@ class CopilotChatReaderService(private val project: Project) {
             return null
         }
 
-        return ChatSession(id = id, title = title, createdAt = createdAt, messages = messages)
+        return ChatSession(id = id, title = title, createdAt = createdAt, messages = messages, lastModifiedAt = lastModifiedAt)
     }
 
     private fun extractUserText(turn: Document): String? {

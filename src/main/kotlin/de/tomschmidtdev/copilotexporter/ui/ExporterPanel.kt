@@ -25,6 +25,10 @@ import de.tomschmidtdev.copilotexporter.services.CopilotChatReaderService
 import de.tomschmidtdev.copilotexporter.settings.ExporterSettingsConfigurable
 import java.awt.BorderLayout
 import java.awt.FlowLayout
+import java.awt.event.MouseEvent
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import javax.swing.BorderFactory
 import javax.swing.JButton
 import javax.swing.JComponent
@@ -68,7 +72,17 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
     private val sessionList = CheckBoxList<ChatSession>()
 
     /** Rechte Seite: Nachrichten der ausgewählten Session mit Checkboxen */
-    private val messageList = CheckBoxList<ChatMessage>()
+    private val messageList = object : CheckBoxList<ChatMessage>() {
+        init {
+            toolTipText = "" // aktiviert ToolTipManager für diese Komponente
+        }
+
+        override fun getToolTipText(e: MouseEvent): String? {
+            val index = locationToIndex(e.point)
+            if (index < 0) return null
+            return getItemAt(index)?.let { buildMessageTooltip(it) }
+        }
+    }
 
     private val previewLabel = JBLabel("Preview").apply {
         border = JBUI.Borders.empty(6, 8, 4, 8)
@@ -404,6 +418,26 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
         roleIndices.forEach { checkedStates[it] = newState }
 
         rebuildMessageList(checkedStates)
+    }
+
+    private fun buildMessageTooltip(message: ChatMessage): String {
+        val sb = StringBuilder("<html>")
+        if (message.timestamp != 0L) {
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault())
+            val dateStr = formatter.format(Instant.ofEpochMilli(message.timestamp))
+            sb.append("<b>$dateStr</b><hr>")
+        }
+        val allLines = message.content.lines()
+        val shown = allLines.take(10)
+        shown.forEach { line ->
+            val display = if (line.length > 100) line.take(99) + "…" else line
+            sb.append(display.escapeHtml()).append("<br>")
+        }
+        if (allLines.size > 10) {
+            sb.append("<i>… (${allLines.size - 10} further line${if (allLines.size - 10 != 1) "s" else ""})</i>")
+        }
+        sb.append("</html>")
+        return sb.toString()
     }
 
     private fun truncate(text: String, maxLen: Int): String =
