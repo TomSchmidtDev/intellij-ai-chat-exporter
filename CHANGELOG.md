@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.5.1] - 2026-05-11
+### Fixed
+- Diagnostic no longer truncates session and turn lists (previously capped at 3 sessions / 5 turns per database file)
+- Sessions with turns that produce no extractable text now emit a debug log entry instead of silently disappearing
+
+### Improved
+- Diagnostic groups turns by session and shows USER / ASSISTANT content availability per turn
+- Timestamps in diagnostic are now formatted as human-readable dates (e.g. `2026-01-15 14:37:43`) in addition to raw milliseconds
+- Sessions without turns are marked `→ FILTERED` in the diagnostic output, making it clear why they do not appear in the plugin UI
+- Deleted turns are counted separately and excluded from the active-turn list in the diagnostic
+
 ## [1.5.0] - 2026-04-07
 ### Added
 - Plugin logo (40×40 SVG) displayed in the JetBrains Marketplace and IDE plugin list

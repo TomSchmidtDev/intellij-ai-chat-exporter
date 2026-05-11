@@ -14,6 +14,9 @@ import org.dizitart.no2.mvstore.MVStoreModule
 import org.dizitart.no2.store.NitriteMap
 import java.io.File
 import java.nio.file.Files
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 // =============================================================================
 // CopilotChatReaderService
@@ -120,20 +123,48 @@ class CopilotChatReaderService(private val project: Project) {
                     val store = db.store
                     val sessionMap = store.openMap<NitriteId, Document>(config.sessionCollection, NitriteId::class.java, Document::class.java)
                     val turnMap = store.openMap<NitriteId, Document>(config.turnCollection, NitriteId::class.java, Document::class.java)
-                    report.appendLine("  Sessions: ${sessionMap.size()}, Turns: ${turnMap.size()}")
-                    sessionMap.values().asSequence().take(3).forEach { doc: Document ->
-                        val id = doc.get("id") as? String ?: "(no id)"
-                        val title = doc.get("name.value") as? String ?: "(no title)"
-                        val created = doc.get("createdAt")
-                        report.appendLine("    Session: $title [$id] created=$created")
-                    }
-                    turnMap.values().asSequence().take(5).forEach { doc: Document ->
-                        val sessionId = doc.get("sessionId") as? String ?: "(no sessionId)"
-                        val userText = (doc.get("request.stringContent") as? String)?.take(80)
-                        val deleted = doc.get("deletedAt")
-                        report.appendLine("    Turn: session=$sessionId deleted=$deleted")
-                        userText?.let { report.appendLine("      request.stringContent: $it") }
-                    }
+
+                    val allSessions = sessionMap.values().toList()
+                    val allTurns = turnMap.values().toList()
+                    report.appendLine("  Sessions: ${allSessions.size}, Turns: ${allTurns.size}")
+
+                    // Group turns by sessionId for efficient per-session display
+                    val turnsBySession: Map<String, List<Document>> = allTurns
+                        .groupBy { doc -> doc.get("sessionId") as? String ?: "" }
+
+                    allSessions
+                        .sortedBy { (it.get("createdAt") as? Number)?.toLong() ?: 0L }
+                        .forEach { doc: Document ->
+                            val id = doc.get("id") as? String ?: "(no id)"
+                            val title = doc.get("name.value") as? String ?: "(no title)"
+                            report.appendLine("  Session: $title [$id]")
+                            report.appendLine("    Created: ${formatTimestamp(doc.get("createdAt"))}")
+
+                            val sessionTurns = (turnsBySession[id] ?: emptyList())
+                                .sortedBy { (it.get("createdAt") as? Number)?.toLong() ?: 0L }
+                            val activeTurns = sessionTurns.filter { it.get("deletedAt") == null }
+                            val deletedCount = sessionTurns.size - activeTurns.size
+
+                            if (sessionTurns.isEmpty()) {
+                                report.appendLine("    Turns: 0  → FILTERED (no turns, will not appear in plugin)")
+                            } else {
+                                val deletedNote = if (deletedCount > 0) ", $deletedCount deleted" else ""
+                                report.appendLine("    Turns: ${sessionTurns.size} total, ${activeTurns.size} active$deletedNote")
+                                activeTurns.forEach { turn ->
+                                    report.appendLine("    Turn [${formatTimestamp(turn.get("createdAt"))}]:")
+                                    val userText = (turn.get("request.stringContent") as? String)?.takeIf { it.isNotBlank() }
+                                    val reqContents = (turn.get("request.contents") as? String)?.takeIf { it.isNotBlank() }
+                                    val hasResponse = turn.get("response.stringContent") != null || turn.get("response.contents") != null
+                                    when {
+                                        userText != null -> report.appendLine("      USER: ${userText.take(120)}")
+                                        reqContents != null -> report.appendLine("      USER (contents): ${reqContents.take(80)}")
+                                        else -> report.appendLine("      USER: (no request content)")
+                                    }
+                                    if (hasResponse) report.appendLine("      ASSISTANT: [response available]")
+                                    else report.appendLine("      ASSISTANT: (no response content)")
+                                }
+                            }
+                        }
                 }
             } catch (e: Exception) {
                 report.appendLine("  ERROR: ${e.message?.take(300)}")
@@ -247,8 +278,10 @@ class CopilotChatReaderService(private val project: Project) {
 
         val messages = mutableListOf<ChatMessage>()
         var index = 0
+        var turnCount = 0
 
         turns.forEach { turn ->
+            turnCount++
             val userText = extractUserText(turn)
             val assistantText = extractAssistantText(turn)
 
@@ -260,7 +293,12 @@ class CopilotChatReaderService(private val project: Project) {
             }
         }
 
-        if (messages.isEmpty()) return null
+        if (messages.isEmpty()) {
+            if (turnCount > 0) {
+                log.debug("Session '$title' [$id]: $turnCount active turn(s) found but no text could be extracted")
+            }
+            return null
+        }
 
         return ChatSession(id = id, title = title, createdAt = createdAt, messages = messages)
     }
@@ -279,6 +317,15 @@ class CopilotChatReaderService(private val project: Project) {
         // Agent/Edit-Modus: komplexes JSON
         (turn.get("response.contents") as? String)?.takeIf { it.isNotBlank() }?.let { return CopilotJsonParser.parseAgentContents(it) }
         return null
+    }
+
+    private fun formatTimestamp(value: Any?): String {
+        val ms = (value as? Number)?.toLong() ?: return "N/A"
+        if (ms == 0L) return "N/A"
+        val formatter = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm:ss")
+            .withZone(ZoneId.systemDefault())
+        return "${formatter.format(Instant.ofEpochMilli(ms))} (ms=$ms)"
     }
 
     // -------------------------------------------------------------------------

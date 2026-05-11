@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.5.0"
+version = "1.5.1"
 
 kotlin {
     jvmToolchain(21)
@@ -27,6 +27,13 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.5.1</b>
+            <ul>
+                <li>Fixed: diagnostic no longer truncates session and turn lists (previously capped at 3 sessions / 5 turns per database)</li>
+                <li>Improved: diagnostic groups turns by session with USER / ASSISTANT content indicators per turn</li>
+                <li>Improved: timestamps in diagnostic shown as formatted dates (e.g. 2026-01-15 14:37:43) plus raw milliseconds</li>
+                <li>Improved: sessions without turns are marked FILTERED in diagnostic output so it is clear why they do not appear in the plugin</li>
+            </ul>
             <b>1.5.0</b>
             <ul>
                 <li>Added: plugin logo displayed in the JetBrains Marketplace and IDE plugin list</li>
