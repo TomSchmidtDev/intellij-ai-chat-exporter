@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.6.0"
+version = "1.6.1"
 
 kotlin {
     jvmToolchain(21)
@@ -27,6 +27,12 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.6.1</b>
+            <ul>
+                <li>Fixed: Claude Code message preview no longer blank for tool-only messages</li>
+                <li>New: Claude Code messages show a tooltip with full content on hover (same as Copilot tab)</li>
+                <li>New: last selected tab (Copilot / Claude Code) is remembered across IDE restarts</li>
+            </ul>
             <b>1.6.0</b>
             <ul>
                 <li>New: Claude Code tab — browse and export Claude Code chat sessions from ~/.claude/projects/</li>

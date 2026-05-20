@@ -32,7 +32,17 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
     private var currentMessages: List<ClaudeCodeMessage> = emptyList()
 
     private val sessionList = CheckBoxList<ClaudeCodeSession>()
-    private val messageList = CheckBoxList<ClaudeCodeMessage>()
+    private val messageList = object : CheckBoxList<ClaudeCodeMessage>() {
+        init {
+            toolTipText = "" // aktiviert ToolTipManager für diese Komponente
+        }
+
+        override fun getToolTipText(e: java.awt.event.MouseEvent): String? {
+            val index = locationToIndex(e.point)
+            if (index < 0) return null
+            return getItemAt(index)?.let { buildMessageTooltip(it) }
+        }
+    }
 
     private val previewLabel = JBLabel("Preview").apply {
         border = JBUI.Borders.empty(6, 8, 4, 8)
@@ -309,6 +319,32 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
             result.add(session to selectedMessages)
         }
         return result
+    }
+
+    private fun buildMessageTooltip(msg: ClaudeCodeMessage): String {
+        val lines = mutableListOf<String>()
+        msg.textBlocks.forEach { lines.addAll(it.lines()) }
+        if (msg.thinkingBlocks.isNotEmpty()) {
+            lines.add("[Thinking]")
+            msg.thinkingBlocks.forEach { lines.addAll(it.lines()) }
+        }
+        if (msg.toolCallBlocks.isNotEmpty()) {
+            lines.add("[Tool Calls]")
+            msg.toolCallBlocks.forEach { lines.addAll(it.lines()) }
+        }
+        if (lines.isEmpty()) return ""
+        val sb = StringBuilder("<html>")
+        val shown = lines.take(10)
+        shown.forEach { line ->
+            val display = if (line.length > 100) line.take(99) + "…" else line
+            sb.append(display.escapeHtml()).append("<br>")
+        }
+        if (lines.size > 10) {
+            val remaining = lines.size - 10
+            sb.append("<i>… ($remaining further line${if (remaining != 1) "s" else ""})</i>")
+        }
+        sb.append("</html>")
+        return sb.toString()
     }
 
     private fun setStatus(text: String) {

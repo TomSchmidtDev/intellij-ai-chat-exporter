@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.6.1] - 2026-05-20
+### Fixed
+- Claude Code message preview no longer blank for messages that contain only tool calls or tool results
+
+### Added
+- Claude Code messages show a tooltip on hover with full content (text, thinking, tool calls) — up to 10 lines, same as Copilot tab
+- Last selected tab (Copilot / Claude Code) is remembered across IDE restarts
+
 ## [1.6.0] - 2026-05-20
 ### Added
 - Claude Code tab: browse and export Claude Code chat sessions stored in `~/.claude/projects/`
