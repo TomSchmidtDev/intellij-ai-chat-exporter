@@ -1,7 +1,7 @@
 # Copilot Chat Exporter — Claude Context
 
 ## What this project is
-An IntelliJ Platform plugin that reads GitHub Copilot chat history from its local Nitrite 4.x database and exports it to Markdown or styled HTML. The plugin is read-only — it never modifies Copilot data.
+An IntelliJ Platform plugin that exports **GitHub Copilot** and **Claude Code** chat history to Markdown or styled HTML. The plugin is read-only — it never modifies any chat data.
 
 ## Build requirements
 - **Java 21** is required (matches JetBrains Runtime 21 bundled in IntelliJ 2025.1+)
@@ -15,15 +15,56 @@ An IntelliJ Platform plugin that reads GitHub Copilot chat history from its loca
 
 ## Architecture
 
+The tool window uses a `JTabbedPane` with two independent tabs:
+
 ```
-ui/                     Tool window (ExporterPanel, ExporterToolWindowFactory)
-services/               CopilotChatReaderService — reads Nitrite DB, cross-platform path resolution
-model/                  ChatSession, ChatMessage, Role
-export/                 HtmlExporter, MarkdownExporter
-settings/               ExporterSettings (persistent), ColorProfile (10 presets + custom), ExporterSettingsConfigurable/Panel
+ui/                     ExporterToolWindowFactory — JTabbedPane with two tabs
+                        ExporterPanel             — Copilot tab
+                        ClaudeCodePanel           — Claude Code tab
+
+services/               CopilotChatReaderService  — reads Nitrite DB (PROJECT service)
+                        CopilotJsonParser         — parses agent/edit JSON in Copilot turns
+                        ClaudeCodeReaderService   — discovers ~/.claude/projects/ (APP service)
+                        ClaudeJsonParser          — parses .jsonl session files
+
+model/                  ChatSession, ChatMessage, Role   — shared; used by both exporters
+                        ClaudeCodeMessage                — typed content blocks (text/thinking/tool_use)
+                        ClaudeCodeSession                — wraps ClaudeCodeMessage list; converts to ChatSession for export
+
+export/                 HtmlExporter, MarkdownExporter   — shared; accept List<ChatSession>
+
+settings/               ExporterSettings (persistent), ColorProfile (10 presets + custom),
+                        ExporterSettingsConfigurable/Panel
 ```
 
+**Key design rule:** `ClaudeCodeMessage` splits assistant content into `textBlocks`, `thinkingBlocks`, and `toolCallBlocks` so the panel can filter by type without re-parsing. `ClaudeCodeSession.toChatSession()` assembles the visible blocks into `ChatMessage.content` just before export.
+
 ## Key technical details
+
+### Claude Code session location
+| OS | Path |
+|---|---|
+| macOS / Linux | `~/.claude/projects/<slug>/<uuid>.jsonl` |
+| Windows | `%USERPROFILE%\.claude\projects\<slug>\<uuid>.jsonl` |
+
+The `<slug>` is the absolute project path with all path separators replaced by `-` (e.g. `/Users/alice/my-app` → `-Users-alice-my-app`). Each `.jsonl` file is one session identified by its UUID filename.
+
+**JSONL entry types used:**
+- `ai-title` → session title (`aiTitle` field)
+- `user` → user turn; `message.content` is a string or array of blocks
+- `assistant` → AI turn; `message.content` is always an array of typed blocks
+- All other types (`attachment`, `system`, `file-history-snapshot`, etc.) are ignored
+
+**Sidechain filtering:** Entries with `isSidechain: true` are skipped — they belong to abandoned conversation branches (e.g. when a user retried a prompt).
+
+**Content blocks in assistant messages:**
+- `text` → always exported
+- `thinking` → exported only when "Thinking" toggle is ON
+- `tool_use` → exported only when "Tool Calls" toggle is ON (formatted as `[Tool: <name>]\n<input json>`)
+
+**Content blocks in user messages:**
+- `text` (string or block) → always exported
+- `tool_result` → placed in `toolCallBlocks`, exported with "Tool Calls" toggle
 
 ### Copilot DB location
 | OS      | Path |
@@ -92,11 +133,12 @@ When bumping a version, always update **all three** in the same commit:
 - Tool window icon (13×13): `src/main/resources/icons/pluginIcon.svg` — speech-bubble style
 - Marketplace / IDE plugin list icon (40×40): `src/main/resources/META-INF/pluginIcon.svg` — document + brain badge
 
-## UI conventions (ExporterPanel)
+## UI conventions (ExporterPanel / ClaudeCodePanel)
 - All UI is built with standard Swing + JetBrains `com.intellij.ui.*` components.
 - Long-running work (DB reads, exports) runs via `Task.Backgroundable`; never block the EDT.
 - `CheckBoxList<T>` — use `addItem(item, text, selected)` to populate; HTML strings are supported as display text.
 - **Avoid calling `setItemSelected` in a loop** — it does an O(n) model scan per call (→ O(n²) total). Instead, read all checked states into a `BooleanArray`, modify it, then rebuild the list with `clear()` + `addItem` in one pass.
+- `ClaudeCodePanel` uses `JToggleButton` fields (stored as class members) for the four visibility toggles so their state can be read at export time without listeners holding stale values.
 
 ## Repository
 https://github.com/TomSchmidtDev/intellij-ai-chat-exporter
