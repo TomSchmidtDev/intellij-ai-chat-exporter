@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.5.6"
+version = "1.6.0"
 
 kotlin {
     jvmToolchain(21)
@@ -27,6 +27,12 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.6.0</b>
+            <ul>
+                <li>New: Claude Code tab — browse and export Claude Code chat sessions from ~/.claude/projects/</li>
+                <li>New: filter Claude Code sessions by project via dropdown</li>
+                <li>New: toggle tool calls and thinking blocks on/off (hidden by default; User and Assistant shown by default)</li>
+            </ul>
             <b>1.5.6</b>
             <ul>
                 <li>Fixed: IDE filter now correctly identifies the current IDE via product code (e.g. "iu" for IntelliJ IDEA Ultimate) — previously no sessions were shown when "All IDEs" was unchecked</li>

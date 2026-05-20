@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0] - 2026-05-20
+### Added
+- Claude Code tab: browse and export Claude Code chat sessions stored in `~/.claude/projects/`
+- Project filter dropdown to show sessions from a specific project only
+- Toggle buttons for Tool Calls and Thinking blocks (hidden by default; User and Assistant shown by default)
+- Sessions from all entrypoints (CLI, Claude Desktop, JetBrains IDE plugin) are included
+
 ## [1.5.6] - 2026-05-20
 ### Fixed
 - IDE filter now correctly identifies the current IDE using the product code (e.g. `iu` for IntelliJ IDEA Ultimate) instead of the script name — previously no sessions were shown when "All IDEs" was disabled
