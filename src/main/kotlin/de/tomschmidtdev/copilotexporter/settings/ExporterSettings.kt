@@ -47,6 +47,7 @@ class ExporterSettings : PersistentStateComponent<ExporterSettings.State> {
         var codeBg: String = "#11111b",
         var borderColor: String = "#313244",
         var showAllIdes: Boolean = false,
+        var selectedTabIndex: Int = 0,
     )
 
     private var myState = State()

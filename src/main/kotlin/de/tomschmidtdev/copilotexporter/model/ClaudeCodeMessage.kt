@@ -28,7 +28,10 @@ data class ClaudeCodeMessage(
     }
 
     val previewText: String
-        get() = textBlocks.firstOrNull()?.take(80) ?: thinkingBlocks.firstOrNull()?.take(80) ?: ""
+        get() = textBlocks.firstOrNull()?.take(80)
+            ?: thinkingBlocks.firstOrNull()?.take(80)
+            ?: toolCallBlocks.firstOrNull()?.take(80)
+            ?: ""
 }
 
 /**

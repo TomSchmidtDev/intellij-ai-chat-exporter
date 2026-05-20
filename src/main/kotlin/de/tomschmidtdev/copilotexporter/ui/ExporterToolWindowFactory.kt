@@ -41,6 +41,10 @@ class ExporterToolWindowFactory : ToolWindowFactory {
         val tabbedPane = javax.swing.JTabbedPane().apply {
             addTab("Copilot", ExporterPanel(project))
             addTab("Claude Code", ClaudeCodePanel(project))
+
+            val settings = de.tomschmidtdev.copilotexporter.settings.ExporterSettings.getInstance()
+            selectedIndex = settings.state.selectedTabIndex.coerceIn(0, tabCount - 1)
+            addChangeListener { settings.state.selectedTabIndex = selectedIndex }
         }
 
         val content = ContentFactory.getInstance()
