@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.5.3] - 2026-05-20
+### Fixed
+- Replaced internal API `PluginManagerCore.getPlugin()` with public `PluginManager.getPluginByClass()` for compatibility with IntelliJ 2026.2+
+
 ## [1.5.2] - 2026-05-11
 ### Changed
 - Session list now shows and sorts by last-modified date (timestamp of the most recent turn) instead of the session creation date

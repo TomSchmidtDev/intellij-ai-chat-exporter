@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.5.2"
+version = "1.5.3"
 
 kotlin {
     jvmToolchain(21)
@@ -27,6 +27,10 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.5.3</b>
+            <ul>
+                <li>Fixed: replaced internal API PluginManagerCore.getPlugin() with public PluginManager.getPluginByClass() for compatibility with IntelliJ 2026.2+</li>
+            </ul>
             <b>1.5.2</b>
             <ul>
                 <li>Changed: session list now shows and sorts by last-modified date (timestamp of the most recent turn) instead of creation date</li>
