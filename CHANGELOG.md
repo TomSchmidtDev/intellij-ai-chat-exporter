@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.5.5] - 2026-05-20
+### Added
+- Sessions are now filtered to the current IDE by default
+- "All IDEs" checkbox in the toolbar and Settings page to show sessions from all JetBrains IDEs
+
 ## [1.5.4] - 2026-05-20
 ### Improved
 - Plugin can now be installed and uninstalled without restarting the IDE (`require-restart="false"`)

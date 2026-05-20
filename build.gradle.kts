@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.5.4"
+version = "1.5.5"
 
 kotlin {
     jvmToolchain(21)
@@ -27,6 +27,10 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.5.5</b>
+            <ul>
+                <li>New: sessions are now filtered to the current IDE by default; enable "All IDEs" in the toolbar or Settings to see sessions from all JetBrains IDEs</li>
+            </ul>
             <b>1.5.4</b>
             <ul>
                 <li>Improved: plugin can now be installed and uninstalled without restarting the IDE (dynamic plugin)</li>
