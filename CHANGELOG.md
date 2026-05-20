@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.2] - 2026-05-20
+### Changed
+- Prompts / Assistant / Tool Calls / Thinking buttons in Claude Code tab now toggle message checkbox selection instead of hiding messages — consistent with Copilot tab behavior
+- "Copilot" button in Copilot tab renamed to "Assistant"
+- "User" button in Claude Code tab renamed to "Prompts"
+- Export always includes full message content; checkbox selection is the filter
+
 ## [1.6.1] - 2026-05-20
 ### Fixed
 - Claude Code message preview no longer blank for messages that contain only tool calls or tool results

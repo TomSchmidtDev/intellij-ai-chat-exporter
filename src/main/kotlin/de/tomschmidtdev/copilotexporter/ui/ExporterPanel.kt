@@ -183,7 +183,7 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
                 toolTipText = "Select / deselect all user prompts"
                 addActionListener { toggleRoleSelection(Role.USER) }
             })
-            add(JButton("Copilot", AllIcons.Actions.Preview).apply {
+            add(JButton("Assistant", AllIcons.Actions.Preview).apply {
                 toolTipText = "Select / deselect all Copilot responses"
                 addActionListener { toggleRoleSelection(Role.ASSISTANT) }
             })

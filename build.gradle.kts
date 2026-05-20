@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.6.1"
+version = "1.6.2"
 
 kotlin {
     jvmToolchain(21)
@@ -27,6 +27,13 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.6.2</b>
+            <ul>
+                <li>Changed: Prompts / Assistant / Tool Calls / Thinking buttons now toggle message checkbox selection (like Copilot tab) instead of hiding messages</li>
+                <li>Changed: "Copilot" button in Copilot tab renamed to "Assistant" for consistency</li>
+                <li>Changed: "User" button in Claude Code tab renamed to "Prompts" for consistency</li>
+                <li>Changed: export always includes full message content; selection controls what is exported</li>
+            </ul>
             <b>1.6.1</b>
             <ul>
                 <li>Fixed: Claude Code message preview no longer blank for tool-only messages</li>

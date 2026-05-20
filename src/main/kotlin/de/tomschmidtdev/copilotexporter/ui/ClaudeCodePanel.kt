@@ -54,12 +54,6 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
     }
     private val projectCombo = JComboBox<String>()
 
-    // Toggle buttons — stored as fields so we can read their state
-    private val toggleUser = JToggleButton("User", AllIcons.General.User, true)
-    private val toggleAssistant = JToggleButton("Assistant", AllIcons.Actions.Preview, true)
-    private val toggleToolCalls = JToggleButton("Tool Calls", AllIcons.Debugger.Console, false)
-    private val toggleThinking = JToggleButton("Thinking", AllIcons.Actions.Lightning, false)
-
     // Known project slugs for mapping combo display names back to slugs
     private var knownSlugs: List<String> = emptyList()
 
@@ -68,9 +62,6 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
         loadSessionsInBackground()
         sessionList.addListSelectionListener { event ->
             if (!event.valueIsAdjusting) updateMessagePreview()
-        }
-        listOf(toggleUser, toggleAssistant, toggleToolCalls, toggleThinking).forEach { btn ->
-            btn.addActionListener { rebuildMessageListPreservingChecks() }
         }
     }
 
@@ -116,10 +107,22 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
         }
 
         val togglePanel = JPanel(FlowLayout(FlowLayout.LEFT, 4, 2)).apply {
-            add(toggleUser.apply { toolTipText = "Show/hide user messages" })
-            add(toggleAssistant.apply { toolTipText = "Show/hide assistant messages" })
-            add(toggleToolCalls.apply { toolTipText = "Show/hide tool calls (hidden by default)" })
-            add(toggleThinking.apply { toolTipText = "Show/hide thinking blocks (hidden by default)" })
+            add(JButton("Prompts", AllIcons.General.User).apply {
+                toolTipText = "Select / deselect all user prompts"
+                addActionListener { toggleTypeSelection { it.role == Role.USER } }
+            })
+            add(JButton("Assistant", AllIcons.Actions.Preview).apply {
+                toolTipText = "Select / deselect all assistant messages"
+                addActionListener { toggleTypeSelection { it.role == Role.CLAUDE } }
+            })
+            add(JButton("Tool Calls", AllIcons.Debugger.Console).apply {
+                toolTipText = "Select / deselect all messages with tool calls"
+                addActionListener { toggleTypeSelection { it.toolCallBlocks.isNotEmpty() } }
+            })
+            add(JButton("Thinking", AllIcons.Actions.Lightning).apply {
+                toolTipText = "Select / deselect all messages with thinking blocks"
+                addActionListener { toggleTypeSelection { it.thinkingBlocks.isNotEmpty() } }
+            })
         }
 
         val previewHeader = JPanel(BorderLayout()).apply {
@@ -176,7 +179,7 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
     private fun selectedProjectSlug(): String? {
         val idx = projectCombo.selectedIndex
         if (idx <= 0) return null
-        return knownSlugs.getOrNull(idx - 1) // offset by 1 for "All Projects" at index 0
+        return knownSlugs.getOrNull(idx - 1)
     }
 
     private fun refreshProjectCombo(slugs: List<String>) {
@@ -192,7 +195,6 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
             projectCombo.addItem(lastComponent)
         }
 
-        // Restore previous selection
         val restoreIdx = if (previousSlug != null) slugs.indexOf(previousSlug) + 1 else 0
         projectCombo.selectedIndex = restoreIdx.coerceIn(0, projectCombo.itemCount - 1)
         projectCombo.addActionListener { loadSessionsInBackground() }
@@ -221,29 +223,45 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
         val title = truncate(session.title, 50).escapeHtml()
         previewLabel.text = "<html><b>Preview</b> <span style='color:gray; font-weight:normal'>&mdash; $title</span></html>"
         currentMessages = session.messages
-        rebuildMessageList(BooleanArray(currentMessages.size) { true })
+        rebuildMessageList(BooleanArray(currentMessages.size) { defaultChecked(currentMessages[it]) })
     }
 
-    private fun rebuildMessageListPreservingChecks() {
-        val checks = BooleanArray(currentMessages.size) { messageList.isItemSelected(it) }
-        rebuildMessageList(checks)
+    /**
+     * Default selection when a session is loaded:
+     * - User messages: selected (Prompts on by default)
+     * - Assistant messages with text content: selected (Assistant on by default)
+     * - Tool-call-only or thinking-only messages: not selected
+     */
+    private fun defaultChecked(msg: ClaudeCodeMessage): Boolean = when (msg.role) {
+        Role.USER -> true
+        Role.CLAUDE -> msg.textBlocks.isNotEmpty()
+        else -> true
     }
 
     private fun rebuildMessageList(checkedStates: BooleanArray) {
         messageList.clear()
         currentMessages.forEachIndexed { i, msg ->
-            val visible = when (msg.role) {
-                Role.USER -> toggleUser.isSelected
-                Role.CLAUDE -> toggleAssistant.isSelected
-                else -> true
-            }
-            if (!visible) return@forEachIndexed
             val roleColor = if (msg.role == Role.USER) "#6ea8fe" else "#75b798"
             val roleName = msg.role.displayName
             val preview = truncate(msg.previewText.replace("\n", " "), 55).escapeHtml()
             val displayText = "<html><span style='color:$roleColor'><b>$roleName:</b></span> $preview</html>"
-            messageList.addItem(msg, displayText, checkedStates.getOrElse(i) { true })
+            messageList.addItem(msg, displayText, checkedStates.getOrElse(i) { defaultChecked(msg) })
         }
+    }
+
+    /**
+     * Toggles the checkbox state for all messages matching the filter.
+     * If all matching messages are checked, unchecks them; otherwise checks them all.
+     * Analogous to ExporterPanel.toggleRoleSelection().
+     */
+    private fun toggleTypeSelection(filter: (ClaudeCodeMessage) -> Boolean) {
+        if (currentMessages.isEmpty()) return
+        val matchingIndices = currentMessages.indices.filter { filter(currentMessages[it]) }
+        if (matchingIndices.isEmpty()) return
+        val checkedStates = BooleanArray(currentMessages.size) { messageList.isItemSelected(it) }
+        val allSelected = matchingIndices.all { checkedStates[it] }
+        matchingIndices.forEach { checkedStates[it] = !allSelected }
+        rebuildMessageList(checkedStates)
     }
 
     private fun selectedSession(): ClaudeCodeSession? {
@@ -273,13 +291,10 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
         val wrapper = dialog.save(baseDir, "$defaultName.${format.extension}") ?: return
         val outputFile = wrapper.file
 
-        val showThinking = toggleThinking.isSelected
-        val showToolCalls = toggleToolCalls.isSelected
-
         ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Exporting chat…", false) {
             override fun run(indicator: ProgressIndicator) {
                 val chatSessions = checkedExports.map { (claudeSession, selected) ->
-                    claudeSession.toChatSession(selected, showThinking, showToolCalls)
+                    claudeSession.toChatSession(selected, showThinking = true, showToolCalls = true)
                 }
                 val content = when (format) {
                     ExportFormat.MARKDOWN -> MarkdownExporter.export(chatSessions)
@@ -314,7 +329,7 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
                 }
                 checked
             } else {
-                session.messages
+                session.messages.filter { defaultChecked(it) }
             }
             result.add(session to selectedMessages)
         }
