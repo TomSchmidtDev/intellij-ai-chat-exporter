@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.5.4] - 2026-05-20
+### Improved
+- Plugin can now be installed and uninstalled without restarting the IDE (`require-restart="false"`)
+
 ## [1.5.3] - 2026-05-20
 ### Fixed
 - Replaced internal API `PluginManagerCore.getPlugin()` with public `PluginManager.getPluginByClass()` for compatibility with IntelliJ 2026.2+

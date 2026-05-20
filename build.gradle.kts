@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.5.3"
+version = "1.5.4"
 
 kotlin {
     jvmToolchain(21)
@@ -27,6 +27,10 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.5.4</b>
+            <ul>
+                <li>Improved: plugin can now be installed and uninstalled without restarting the IDE (dynamic plugin)</li>
+            </ul>
             <b>1.5.3</b>
             <ul>
                 <li>Fixed: replaced internal API PluginManagerCore.getPlugin() with public PluginManager.getPluginByClass() for compatibility with IntelliJ 2026.2+</li>

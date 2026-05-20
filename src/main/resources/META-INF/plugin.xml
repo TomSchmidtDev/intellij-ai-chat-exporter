@@ -1,4 +1,4 @@
-<idea-plugin>
+<idea-plugin require-restart="false">
 
     <id>de.tomschmidtdev.copilot-chat-exporter</id>
     <name>Copilot Chat Exporter</name>
