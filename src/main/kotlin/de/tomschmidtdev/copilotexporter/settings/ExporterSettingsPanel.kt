@@ -14,6 +14,9 @@ import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.FormBuilder
 import com.intellij.util.ui.JBUI
 import de.tomschmidtdev.copilotexporter.services.CopilotChatReaderService
+import java.awt.GridBagConstraints
+import java.awt.GridBagLayout
+import java.awt.Insets
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.FlowLayout
@@ -166,9 +169,21 @@ class ExporterSettingsPanel : JPanel() {
             })
         }
 
-        val generalSection = JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply {
+        val currentIdeLabel = JBLabel("Current IDE directory: ${CopilotChatReaderService.currentIdeDirectoryName()}").apply {
+            foreground = JBUI.CurrentTheme.Label.disabledForeground()
+            border = JBUI.Borders.emptyLeft(4)
+        }
+
+        val generalSection = JPanel(GridBagLayout()).apply {
             border = JBUI.Borders.emptyTop(4)
-            add(showAllIdesCheckBox)
+            val gbc = GridBagConstraints().apply {
+                anchor = GridBagConstraints.WEST
+                insets = Insets(0, 0, 2, 0)
+                gridx = 0; gridy = 0; weightx = 1.0; fill = GridBagConstraints.HORIZONTAL
+            }
+            add(showAllIdesCheckBox, gbc)
+            gbc.gridy = 1; gbc.insets = Insets(0, 24, 0, 0)
+            add(currentIdeLabel, gbc)
         }
 
         val generalWrapper = JPanel(java.awt.BorderLayout()).apply {

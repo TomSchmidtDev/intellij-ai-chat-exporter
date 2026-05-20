@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.5.5"
+version = "1.5.6"
 
 kotlin {
     jvmToolchain(21)
@@ -27,6 +27,11 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.5.6</b>
+            <ul>
+                <li>Fixed: IDE filter now correctly identifies the current IDE via product code (e.g. "iu" for IntelliJ IDEA Ultimate) — previously no sessions were shown when "All IDEs" was unchecked</li>
+                <li>New: Settings page now shows the detected IDE directory name below the "All IDEs" checkbox</li>
+            </ul>
             <b>1.5.5</b>
             <ul>
                 <li>New: sessions are now filtered to the current IDE by default; enable "All IDEs" in the toolbar or Settings to see sessions from all JetBrains IDEs</li>

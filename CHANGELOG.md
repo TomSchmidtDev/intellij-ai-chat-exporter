@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.6] - 2026-05-20
+### Fixed
+- IDE filter now correctly identifies the current IDE using the product code (e.g. `iu` for IntelliJ IDEA Ultimate) instead of the script name — previously no sessions were shown when "All IDEs" was disabled
+
+### Added
+- Settings page now shows the detected IDE directory name below the "All IDEs" checkbox
+
 ## [1.5.5] - 2026-05-20
 ### Added
 - Sessions are now filtered to the current IDE by default

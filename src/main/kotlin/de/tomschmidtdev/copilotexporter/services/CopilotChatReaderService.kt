@@ -1,6 +1,6 @@
 package de.tomschmidtdev.copilotexporter.services
 
-import com.intellij.openapi.application.ApplicationNamesInfo
+import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
@@ -365,7 +365,7 @@ class CopilotChatReaderService(private val project: Project) {
     private fun findAllDatabaseFiles(showAllIdes: Boolean): List<Pair<File, SessionTypeConfig>> {
         val result = mutableListOf<Pair<File, SessionTypeConfig>>()
         val seen = mutableSetOf<String>()
-        val currentIde = ApplicationNamesInfo.getInstance().scriptName.lowercase()
+        val currentIde = currentIdeDirectoryName()
 
         copilotBaseDirs().forEach { base ->
             base.listFiles()?.filter { it.isDirectory }
@@ -389,6 +389,12 @@ class CopilotChatReaderService(private val project: Project) {
     // -------------------------------------------------------------------------
     // Diagnose-Datenklasse
     // -------------------------------------------------------------------------
+
+    companion object {
+        /** Returns the lowercase product code used by Copilot as the IDE directory name (e.g. "iu", "py", "cl"). */
+        fun currentIdeDirectoryName(): String =
+            ApplicationInfo.getInstance().build.productCode.lowercase()
+    }
 
     data class DiagnosticReport(
         val basePaths: List<String>,
