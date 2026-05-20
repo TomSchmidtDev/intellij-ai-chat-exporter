@@ -22,6 +22,7 @@ import de.tomschmidtdev.copilotexporter.model.ChatMessage
 import de.tomschmidtdev.copilotexporter.model.ChatSession
 import de.tomschmidtdev.copilotexporter.model.Role
 import de.tomschmidtdev.copilotexporter.services.CopilotChatReaderService
+import de.tomschmidtdev.copilotexporter.settings.ExporterSettings
 import de.tomschmidtdev.copilotexporter.settings.ExporterSettingsConfigurable
 import java.awt.BorderLayout
 import java.awt.FlowLayout
@@ -31,6 +32,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import javax.swing.BorderFactory
 import javax.swing.JButton
+import javax.swing.JCheckBox
 import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.SwingUtilities
@@ -94,6 +96,15 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
         border = JBUI.Borders.empty(4, 8)
     }
 
+    private val allIdesCheckBox = JCheckBox("All IDEs").apply {
+        toolTipText = "Show sessions from all JetBrains IDEs, not just this one"
+        isSelected = ExporterSettings.getInstance().state.showAllIdes
+        addActionListener {
+            ExporterSettings.getInstance().state.showAllIdes = isSelected
+            loadSessionsInBackground()
+        }
+    }
+
     // -------------------------------------------------------------------------
     // Init
     // -------------------------------------------------------------------------
@@ -124,6 +135,7 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
         )
 
         val leftButtons = JPanel(FlowLayout(FlowLayout.LEFT, 4, 2)).apply {
+            add(allIdesCheckBox)
             add(JButton("Refresh", AllIcons.Actions.Refresh).apply {
                 toolTipText = "Reload chat sessions from Copilot database"
                 addActionListener { loadSessionsInBackground() }
@@ -217,6 +229,7 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
      * onSuccess() wird danach auf dem EDT aufgerufen → sicher für UI-Updates.
      */
     private fun loadSessionsInBackground() {
+        allIdesCheckBox.isSelected = ExporterSettings.getInstance().state.showAllIdes
         setStatus("Loading…")
 
         ProgressManager.getInstance().run(object : Task.Backgroundable(
@@ -248,7 +261,9 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
         sessionList.clear()
 
         if (sessions.isEmpty()) {
-            setStatus("No Copilot chat sessions found in this project.")
+            val hint = if (ExporterSettings.getInstance().state.showAllIdes) ""
+                       else " Enable \"All IDEs\" to see sessions from other IDEs."
+            setStatus("No Copilot sessions found for this IDE.$hint")
             return
         }
 
