@@ -1,11 +1,13 @@
 package de.tomschmidtdev.copilotexporter.services
 
+import com.intellij.openapi.application.ApplicationNamesInfo
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import de.tomschmidtdev.copilotexporter.model.ChatMessage
 import de.tomschmidtdev.copilotexporter.model.ChatSession
 import de.tomschmidtdev.copilotexporter.model.Role
+import de.tomschmidtdev.copilotexporter.settings.ExporterSettings
 import org.dizitart.no2.Nitrite
 import org.dizitart.no2.collection.Document
 import org.dizitart.no2.collection.NitriteId
@@ -81,7 +83,8 @@ class CopilotChatReaderService(private val project: Project) {
     // -------------------------------------------------------------------------
 
     fun readSessions(): List<ChatSession> {
-        val dbFiles = findAllDatabaseFiles()
+        val showAllIdes = ExporterSettings.getInstance().state.showAllIdes
+        val dbFiles = findAllDatabaseFiles(showAllIdes)
         if (dbFiles.isEmpty()) {
             log.info("No Copilot *.db files found under ${copilotBaseDirs().map { it.absolutePath }}")
             return emptyList()
@@ -93,7 +96,8 @@ class CopilotChatReaderService(private val project: Project) {
 
     fun diagnose(): DiagnosticReport {
         val baseDirs = copilotBaseDirs()
-        val dbFiles = findAllDatabaseFiles()
+        val showAllIdes = ExporterSettings.getInstance().state.showAllIdes
+        val dbFiles = findAllDatabaseFiles(showAllIdes)
         val report = StringBuilder()
 
         if (dbFiles.isEmpty()) {
@@ -358,23 +362,26 @@ class CopilotChatReaderService(private val project: Project) {
         return candidates.filter { it.exists() && it.isDirectory }
     }
 
-    private fun findAllDatabaseFiles(): List<Pair<File, SessionTypeConfig>> {
+    private fun findAllDatabaseFiles(showAllIdes: Boolean): List<Pair<File, SessionTypeConfig>> {
         val result = mutableListOf<Pair<File, SessionTypeConfig>>()
         val seen = mutableSetOf<String>()
+        val currentIde = ApplicationNamesInfo.getInstance().scriptName.lowercase()
 
         copilotBaseDirs().forEach { base ->
-            base.listFiles()?.filter { it.isDirectory }?.forEach { ideDir ->
-                sessionTypes.forEach { (sessionTypeName, config) ->
-                    File(ideDir, sessionTypeName).takeIf { it.exists() }
-                        ?.listFiles()?.filter { it.isDirectory }
-                        ?.forEach { hashDir ->
-                            val dbFile = File(hashDir, config.dbFileName)
-                            if (dbFile.exists() && seen.add(dbFile.canonicalPath)) {
-                                result.add(dbFile to config)
+            base.listFiles()?.filter { it.isDirectory }
+                ?.filter { showAllIdes || it.name.lowercase() == currentIde }
+                ?.forEach { ideDir ->
+                    sessionTypes.forEach { (sessionTypeName, config) ->
+                        File(ideDir, sessionTypeName).takeIf { it.exists() }
+                            ?.listFiles()?.filter { it.isDirectory }
+                            ?.forEach { hashDir ->
+                                val dbFile = File(hashDir, config.dbFileName)
+                                if (dbFile.exists() && seen.add(dbFile.canonicalPath)) {
+                                    result.add(dbFile to config)
+                                }
                             }
-                        }
+                    }
                 }
-            }
         }
         return result
     }
