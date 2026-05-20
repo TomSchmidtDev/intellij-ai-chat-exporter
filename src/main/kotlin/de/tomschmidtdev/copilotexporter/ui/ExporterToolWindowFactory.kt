@@ -29,23 +29,22 @@ class ExporterToolWindowFactory : ToolWindowFactory {
      * hinzugefügt werden kann. displayName ist der Text im Tab.
      */
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        val panel = ExporterPanel(project)
-
         val version = PluginManager
             .getPluginByClass(ExporterToolWindowFactory::class.java)
             ?.version
 
         if (version != null) {
             // stripeTitle = Text im seitlichen Icon-Strip der IDE
-            toolWindow.stripeTitle = "Copilot Chat Exporter $version"
+            toolWindow.stripeTitle = "AI Chat Exporter $version"
+        }
+
+        val tabbedPane = javax.swing.JTabbedPane().apply {
+            addTab("Copilot", ExporterPanel(project))
+            addTab("Claude Code", ClaudeCodePanel(project))
         }
 
         val content = ContentFactory.getInstance()
-            .createContent(
-                panel,
-                null,
-                false,
-            )
+            .createContent(tabbedPane, null, false)
 
         toolWindow.contentManager.addContent(content)
     }
