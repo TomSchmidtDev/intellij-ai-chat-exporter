@@ -50,7 +50,7 @@ No change to parsing logic; only the directory scan is affected.
 
 ### 3. ExporterPanel (toolbar)
 
-Add a `JCheckBox("All IDEs")` to the existing toolbar row, to the right of the current buttons.
+Add a `JCheckBox("All IDEs")` to `leftButtons` in the toolbar, as the first element — to the left of the "Refresh" button.
 
 - Initialized from `ExporterSettings.showAllIdes`
 - On state change: persist to `ExporterSettings.showAllIdes`, then reload the session list
