@@ -66,6 +66,7 @@ object HtmlExporter {
         val cssClass = when (message.role) {
             Role.USER -> "message user-message"
             Role.ASSISTANT -> "message copilot-message"
+            Role.CLAUDE -> "message assistant-message"
             Role.UNKNOWN -> "message unknown-message"
         }
         val label = message.role.displayName

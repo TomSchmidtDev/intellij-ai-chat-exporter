@@ -23,6 +23,7 @@ data class ChatMessage(
 enum class Role(val displayName: String) {
     USER("User"),
     ASSISTANT("Copilot"),
+    CLAUDE("Claude"),
     UNKNOWN("Unknown"),
     ;
 

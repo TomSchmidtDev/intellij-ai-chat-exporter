@@ -56,6 +56,7 @@ object MarkdownExporter {
         val prefix = when (message.role) {
             Role.USER -> "**User:**"
             Role.ASSISTANT -> "**Copilot:**"
+            Role.CLAUDE -> "**Claude:**"
             Role.UNKNOWN -> "**Unknown:**"
         }
 
