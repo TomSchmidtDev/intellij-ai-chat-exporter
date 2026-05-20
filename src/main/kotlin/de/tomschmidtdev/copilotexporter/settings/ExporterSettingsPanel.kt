@@ -20,6 +20,7 @@ import java.awt.FlowLayout
 import java.awt.Font
 import javax.swing.Box
 import javax.swing.JButton
+import javax.swing.JCheckBox
 import javax.swing.JComboBox
 import javax.swing.JComponent
 import javax.swing.JPanel
@@ -45,6 +46,8 @@ class ExporterSettingsPanel : JPanel() {
     // Profil-Auswahl
     // -------------------------------------------------------------------------
     private val profileCombo = JComboBox(ColorProfiles.ALL_WITH_CUSTOM.toTypedArray())
+
+    private val showAllIdesCheckBox = JCheckBox("Show sessions from all IDEs (not just the current one)")
 
     // -------------------------------------------------------------------------
     // Farb-Felder (ColorPanel = IntelliJ-Komponente mit eingebautem Color-Picker)
@@ -163,11 +166,24 @@ class ExporterSettingsPanel : JPanel() {
             })
         }
 
+        val generalSection = JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply {
+            border = JBUI.Borders.emptyTop(4)
+            add(showAllIdesCheckBox)
+        }
+
+        val generalWrapper = JPanel(java.awt.BorderLayout()).apply {
+            add(TitledSeparator("General"), java.awt.BorderLayout.NORTH)
+            add(generalSection, java.awt.BorderLayout.CENTER)
+        }
+
         return JPanel(java.awt.BorderLayout()).apply {
             border = JBUI.Borders.empty(0)
-            add(TitledSeparator("HTML Export Colors"), java.awt.BorderLayout.NORTH)
-            add(colorForm, java.awt.BorderLayout.CENTER)
-            add(debugSection, java.awt.BorderLayout.SOUTH)
+            add(generalWrapper, java.awt.BorderLayout.NORTH)
+            add(JPanel(java.awt.BorderLayout()).apply {
+                add(TitledSeparator("HTML Export Colors"), java.awt.BorderLayout.NORTH)
+                add(colorForm, java.awt.BorderLayout.CENTER)
+                add(debugSection, java.awt.BorderLayout.SOUTH)
+            }, java.awt.BorderLayout.CENTER)
         }
     }
 
@@ -177,13 +193,15 @@ class ExporterSettingsPanel : JPanel() {
 
     fun isModified(): Boolean {
         val state = ExporterSettings.getInstance().state
-        return entries.any { entry ->
-            entry.panel.selectedColor?.toHex() != entry.getter(state)
-        }
+        return showAllIdesCheckBox.isSelected != state.showAllIdes ||
+            entries.any { entry ->
+                entry.panel.selectedColor?.toHex() != entry.getter(state)
+            }
     }
 
     fun apply() {
         val state = ExporterSettings.getInstance().state
+        state.showAllIdes = showAllIdesCheckBox.isSelected
         entries.forEach { entry ->
             entry.panel.selectedColor?.toHex()?.let { hex -> entry.setter(state, hex) }
         }
@@ -191,6 +209,7 @@ class ExporterSettingsPanel : JPanel() {
 
     fun reset() {
         val state = ExporterSettings.getInstance().state
+        showAllIdesCheckBox.isSelected = state.showAllIdes
         entries.forEach { entry ->
             runCatching { Color.decode(entry.getter(state)) }.getOrNull()
                 ?.let { entry.panel.selectedColor = it }
