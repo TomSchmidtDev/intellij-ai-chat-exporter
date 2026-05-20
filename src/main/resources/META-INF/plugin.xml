@@ -44,6 +44,9 @@
                 serviceImplementation="de.tomschmidtdev.copilotexporter.services.CopilotChatReaderService"/>
 
         <applicationService
+                serviceImplementation="de.tomschmidtdev.copilotexporter.services.ClaudeCodeReaderService"/>
+
+        <applicationService
                 serviceImplementation="de.tomschmidtdev.copilotexporter.settings.ExporterSettings"/>
 
         <applicationConfigurable
