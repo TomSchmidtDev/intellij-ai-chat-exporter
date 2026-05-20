@@ -46,6 +46,7 @@ class ExporterSettings : PersistentStateComponent<ExporterSettings.State> {
         var sessionTitleColor: String = "#cba6f7",
         var codeBg: String = "#11111b",
         var borderColor: String = "#313244",
+        var showAllIdes: Boolean = false,
     )
 
     private var myState = State()
