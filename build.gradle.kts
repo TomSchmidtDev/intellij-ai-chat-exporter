@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.6.2"
+version = "1.6.3"
 
 kotlin {
     jvmToolchain(21)
@@ -27,6 +27,10 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.6.3</b>
+            <ul>
+                <li>Fixed: replaced internal IntelliJ Platform API usage (resolves JetBrains Marketplace compatibility warning for IntelliJ 2026.2+)</li>
+            </ul>
             <b>1.6.2</b>
             <ul>
                 <li>Changed: Prompts / Assistant / Tool Calls / Thinking buttons now toggle message checkbox selection (like Copilot tab) instead of hiding messages</li>

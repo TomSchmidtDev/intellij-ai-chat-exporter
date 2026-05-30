@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.6.3] - 2026-05-30
+### Fixed
+- Replaced internal IntelliJ Platform API `PluginManager.getPluginByClass` with public API — resolves JetBrains Marketplace compatibility warning for IntelliJ 2026.2+
+
 ## [1.6.2] - 2026-05-20
 ### Changed
 - Prompts / Assistant / Tool Calls / Thinking buttons in Claude Code tab now toggle message checkbox selection instead of hiding messages — consistent with Copilot tab behavior
