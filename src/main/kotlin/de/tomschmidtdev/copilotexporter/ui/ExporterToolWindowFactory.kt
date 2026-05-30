@@ -1,8 +1,7 @@
 package de.tomschmidtdev.copilotexporter.ui
 
-import com.intellij.ide.plugins.PluginManager
-import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.project.Project
+import de.tomschmidtdev.copilotexporter.BuildConfig
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.ContentFactory
@@ -30,14 +29,7 @@ class ExporterToolWindowFactory : ToolWindowFactory {
      * hinzugefügt werden kann. displayName ist der Text im Tab.
      */
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        val version = PluginManager
-            .getPlugin(PluginId.getId("de.tomschmidtdev.copilot-chat-exporter"))
-            ?.version
-
-        if (version != null) {
-            // stripeTitle = Text im seitlichen Icon-Strip der IDE
-            toolWindow.stripeTitle = "AI Chat Exporter $version"
-        }
+        toolWindow.stripeTitle = "AI Chat Exporter ${BuildConfig.VERSION}"
 
         val tabbedPane = javax.swing.JTabbedPane().apply {
             addTab("Copilot", ExporterPanel(project))

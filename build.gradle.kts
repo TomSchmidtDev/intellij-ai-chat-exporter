@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.6.3"
+version = "1.6.4"
 
 kotlin {
     jvmToolchain(21)
@@ -27,6 +27,10 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.6.4</b>
+            <ul>
+                <li>Fixed: plugin version is now embedded at build time — eliminates all internal and deprecated PluginManager API usages (Marketplace compatibility)</li>
+            </ul>
             <b>1.6.3</b>
             <ul>
                 <li>Fixed: replaced internal IntelliJ Platform API usage (resolves JetBrains Marketplace compatibility warning for IntelliJ 2026.2+)</li>
@@ -154,6 +158,30 @@ intellijPlatform {
             recommended()
         }
     }
+}
+
+val generateBuildConfig by tasks.registering {
+    val outputDir = layout.buildDirectory.dir("generated/buildconfig")
+    val pluginVersion = project.version.toString()
+    outputs.dir(outputDir)
+    inputs.property("version", pluginVersion)
+    doLast {
+        val dir = outputDir.get().asFile.resolve("de/tomschmidtdev/copilotexporter")
+        dir.mkdirs()
+        dir.resolve("BuildConfig.kt").writeText(
+            """package de.tomschmidtdev.copilotexporter
+
+object BuildConfig {
+    const val VERSION = "$pluginVersion"
+}
+"""
+        )
+    }
+}
+
+tasks.compileKotlin {
+    dependsOn(generateBuildConfig)
+    source(layout.buildDirectory.dir("generated/buildconfig"))
 }
 
 tasks.test {

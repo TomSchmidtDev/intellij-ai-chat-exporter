@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.6.4] - 2026-05-30
+### Fixed
+- Plugin version is now embedded at build time via a generated `BuildConfig` constant — eliminates all internal and deprecated `PluginManager` API usages, resolving JetBrains Marketplace compatibility warnings for IntelliJ 2026.2+
+
 ## [1.6.3] - 2026-05-30
 ### Fixed
 - Replaced internal IntelliJ Platform API `PluginManager.getPluginByClass` with public API — resolves JetBrains Marketplace compatibility warning for IntelliJ 2026.2+
