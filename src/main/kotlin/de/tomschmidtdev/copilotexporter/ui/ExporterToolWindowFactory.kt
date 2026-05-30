@@ -1,6 +1,7 @@
 package de.tomschmidtdev.copilotexporter.ui
 
 import com.intellij.ide.plugins.PluginManager
+import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
@@ -30,7 +31,7 @@ class ExporterToolWindowFactory : ToolWindowFactory {
      */
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val version = PluginManager
-            .getPluginByClass(ExporterToolWindowFactory::class.java)
+            .getPlugin(PluginId.getId("de.tomschmidtdev.copilot-chat-exporter"))
             ?.version
 
         if (version != null) {
