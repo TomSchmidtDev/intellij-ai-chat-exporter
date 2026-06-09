@@ -8,6 +8,12 @@ An IntelliJ plugin that lets you export your **GitHub Copilot** and **Claude Cod
 
 ## Features
 
+### Search
+- **Search across all sessions** — find sessions by content, title, or message text in both tabs
+- **Boolean query syntax** — `AND`, `OR`, exact phrases with quotes, and grouping with parentheses
+- **Scope toggles** — search prompts, responses, and/or session titles independently
+- **Live filtering** — sessions are filtered as you type with a match-count badge; matching messages are highlighted in the preview panel
+
 ### GitHub Copilot
 - **Browse all Copilot chat sessions** — inline chat, agent mode, and edit mode
 - **Select individual messages** per session for partial exports
@@ -40,6 +46,12 @@ Open **Settings → Tools → Copilot Chat Exporter** to configure the HTML colo
 Or install manually via **Settings → Plugins → Install Plugin from Disk** using the `.zip` from the [Releases](https://github.com/TomSchmidtDev/intellij-ai-chat-exporter/releases) page.
 
 ## Usage
+
+### Searching sessions
+1. Type in the **Search** field below the toolbar buttons
+2. Use `AND`, `OR`, `"exact phrase"`, and `(grouping)` for boolean queries
+3. Use the **Prompts / Responses / Title** checkboxes to control which content is searched
+4. Sessions with matches show a badge with the match count; click a session to see highlighted messages
 
 ### Copilot tab
 1. Open the **AI Chat Exporter** tool window (right sidebar) and select the **Copilot** tab

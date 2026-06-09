@@ -8,6 +8,12 @@ Ein IntelliJ-Plugin, mit dem du deine **GitHub Copilot**- und **Claude Code**-Ch
 
 ## Funktionen
 
+### Suche
+- **Alle Sitzungen durchsuchen** — nach Inhalt, Titel oder Nachrichtentext in beiden Tabs
+- **Boolesche Abfragesyntax** — `AND`, `OR`, exakte Phrasen mit Anführungszeichen und Klammergruppen
+- **Suchbereich-Schalter** — Prompts, Antworten und/oder Sitzungstitel unabhängig durchsuchen
+- **Live-Filterung** — Sitzungen werden beim Tippen gefiltert; Treffer-Sitzungen zeigen einen Badge; passende Nachrichten werden im Vorschaufenster hervorgehoben
+
 ### GitHub Copilot
 - **Alle Copilot-Sitzungen durchsuchen** — Inline-Chat, Agent-Modus und Edit-Modus
 - **Einzelne Nachrichten auswählen** pro Sitzung für teilweise Exporte
@@ -40,6 +46,12 @@ Ein IntelliJ-Plugin, mit dem du deine **GitHub Copilot**- und **Claude Code**-Ch
 Oder installiere es manuell über **Einstellungen → Plugins → Plugin von Datenträger installieren** mit der `.zip`-Datei von der [Releases](https://github.com/TomSchmidtDev/intellij-ai-chat-exporter/releases)-Seite.
 
 ## Verwendung
+
+### Sitzungen suchen
+1. Text in das **Suche**-Feld unterhalb der Toolbar-Schaltflächen eingeben
+2. `AND`, `OR`, `"exakte Phrase"` und `(Klammergruppen)` für boolesche Abfragen nutzen
+3. Mit den Schaltern **Prompts / Antworten / Titel** steuern, welche Inhalte durchsucht werden
+4. Sitzungen mit Treffern zeigen einen Badge mit der Anzahl; Klick auf eine Sitzung zeigt hervorgehobene Nachrichten
 
 ### Copilot-Tab
 1. Öffne das **AI Chat Exporter**-Tool-Fenster (rechte Seitenleiste) und wähle den Tab **Copilot**
