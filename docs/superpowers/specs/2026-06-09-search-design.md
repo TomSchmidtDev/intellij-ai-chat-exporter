@@ -35,7 +35,7 @@ Search is triggered with a **300 ms debounce** after the last keystroke to avoid
 Existing `CheckBoxList<Session>` is reused. When a search query is active:
 
 - Sessions with at least one matching message: rendered normally with an amber badge showing the match count (e.g. `5`)
-- Sessions with no matches: text set to a dimmed/greyed colour; still clickable and checkable, but visually de-emphasised
+- Sessions with no matches: the HTML display string uses a muted CSS colour (e.g. `color:#666`) for both title and metadata; still clickable and checkable, but visually de-emphasised
 
 The badge is embedded in the HTML display string already used for each session item.
 
@@ -110,14 +110,20 @@ A session matches if: its title matches (when Title is checked) **OR** at least 
 
 ## Highlighting
 
-Matched terms are wrapped in HTML inside the existing display strings:
+The preview text pipeline for a message list item is:
+
+1. **Truncate** the raw plain text to 55 characters (existing logic)
+2. **Find match positions** in the truncated plain text (character offsets from `SearchMatcher`)
+3. **Build HTML** by iterating the plain text: non-matched segments are HTML-escaped normally; matched segments are HTML-escaped and wrapped in `<mark style='background:#6b5900;color:#ffd700'>…</mark>`
+
+This order is important: positions are computed on plain text before any escaping, so HTML entity expansion (e.g. `&amp;`) cannot shift offsets.
 
 ```kotlin
-val highlighted = rawText.highlightMatches(matchPositions, "#ffd700")
-// produces: "…Wie nutze ich <b style='background:#6b5900;color:#ffd700'>React hooks</b>…"
+// Pseudocode
+val plain = truncate(rawText.replace("\n", " "), 55)
+val ranges = matcher.matchRanges(plain)           // List<IntRange>
+val html = plain.buildHighlightedHtml(ranges)     // escapes + injects <mark>
 ```
-
-The preview text is already truncated to 55 characters before HTML escaping, so highlighting is applied after truncation to avoid offset drift.
 
 ## Error Handling
 
