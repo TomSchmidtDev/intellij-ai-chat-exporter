@@ -20,6 +20,11 @@ import de.tomschmidtdev.copilotexporter.export.MarkdownExporter
 import de.tomschmidtdev.copilotexporter.model.ClaudeCodeMessage
 import de.tomschmidtdev.copilotexporter.model.ClaudeCodeSession
 import de.tomschmidtdev.copilotexporter.model.Role
+import de.tomschmidtdev.copilotexporter.search.QueryParseException
+import de.tomschmidtdev.copilotexporter.search.QueryParser
+import de.tomschmidtdev.copilotexporter.search.SearchMatcher
+import de.tomschmidtdev.copilotexporter.search.SearchNode
+import de.tomschmidtdev.copilotexporter.search.buildHighlightedHtml
 import de.tomschmidtdev.copilotexporter.services.ClaudeCodeReaderService
 import de.tomschmidtdev.copilotexporter.services.ClaudeJsonParser
 import java.awt.BorderLayout
@@ -57,12 +62,39 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
     // Known project slugs for mapping combo display names back to slugs
     private var knownSlugs: List<String> = emptyList()
 
+    // ── Search ────────────────────────────────────────────────────────────────
+    private val searchField = JTextField()
+    private val defaultSearchBorder: javax.swing.border.Border = searchField.border
+    private val clearButton = JButton("✕").apply {
+        isVisible = false
+        isBorderPainted = false
+        isContentAreaFilled = false
+        toolTipText = "Clear search"
+        addActionListener {
+            searchField.text = ""
+            debounceTimer?.stop()
+            applySearch()
+        }
+    }
+    private val searchPrompts   = JCheckBox("Prompts", true)
+    private val searchResponses = JCheckBox("Responses", true)
+    private val searchTitle     = JCheckBox("Title", true)
+    private var activeQuery: SearchNode? = null
+    private var debounceTimer: javax.swing.Timer? = null
+
     init {
         buildLayout()
         loadSessionsInBackground()
         sessionList.addListSelectionListener { event ->
             if (!event.valueIsAdjusting) updateMessagePreview()
         }
+
+        searchField.document.addDocumentListener(object : javax.swing.event.DocumentListener {
+            override fun changedUpdate(e: javax.swing.event.DocumentEvent?) = scheduleSearch()
+            override fun insertUpdate(e: javax.swing.event.DocumentEvent?) = scheduleSearch()
+            override fun removeUpdate(e: javax.swing.event.DocumentEvent?) = scheduleSearch()
+        })
+        listOf(searchPrompts, searchResponses, searchTitle).forEach { it.addActionListener { applySearch() } }
     }
 
     private fun buildLayout() {
@@ -144,7 +176,30 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
             secondComponent = messagePanel
         }
 
-        add(toolbar, BorderLayout.NORTH)
+        val searchPanel = JPanel(BorderLayout(4, 2)).apply {
+            border = JBUI.Borders.empty(2, 4, 2, 4)
+            val fieldRow = JPanel(BorderLayout(4, 0)).apply {
+                add(com.intellij.ui.components.JBLabel(AllIcons.Actions.Find), BorderLayout.WEST)
+                add(searchField, BorderLayout.CENTER)
+                add(clearButton, BorderLayout.EAST)
+            }
+            val hintRow = JPanel(FlowLayout(FlowLayout.LEFT, 6, 0)).apply {
+                add(searchPrompts)
+                add(searchResponses)
+                add(searchTitle)
+                add(com.intellij.ui.components.JBLabel("Syntax: word · AND · OR · (…) · \"phrase\"").apply {
+                    foreground = JBUI.CurrentTheme.Label.disabledForeground()
+                    font = font.deriveFont(10f)
+                })
+            }
+            add(fieldRow, BorderLayout.NORTH)
+            add(hintRow, BorderLayout.SOUTH)
+        }
+        val topPanel = JPanel(BorderLayout()).apply {
+            add(toolbar, BorderLayout.NORTH)
+            add(searchPanel, BorderLayout.SOUTH)
+        }
+        add(topPanel, BorderLayout.NORTH)
         add(splitter, BorderLayout.CENTER)
         add(statusLabel, BorderLayout.SOUTH)
     }
@@ -202,18 +257,49 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
 
     private fun populateSessionList() {
         sessionList.clear()
+        val matcher = activeQuery?.let { SearchMatcher(it) }
+
         if (sessions.isEmpty()) {
             setStatus("No Claude Code sessions found.")
             return
         }
+
+        val dimColor = JBUI.CurrentTheme.Label.disabledForeground()
+        val dimHex = "#%02x%02x%02x".format(dimColor.red, dimColor.green, dimColor.blue)
+
         sessions.forEachIndexed { index, session ->
-            val displayText = "<html><b>${truncate(session.title, 30).escapeHtml()}</b>" +
-                    "<br><small>${session.formattedDate} · ${session.messageCount}</small></html>"
+            val matchCount = matcher?.let { sessionMatchCount(session, it) } ?: -1
+            val isDimmed = matcher != null && matchCount == 0
+            val title = truncate(session.title, 30).escapeHtml()
+            val meta = "${session.formattedDate} · ${session.messageCount}"
+
+            val displayText = when {
+                isDimmed ->
+                    "<html><span style='color:$dimHex'><b>$title</b><br><small>$meta</small></span></html>"
+                matcher != null ->
+                    "<html><b>$title</b> <span style='background:#b8860b;color:#fff;" +
+                    "padding:1px 5px;border-radius:8px;font-size:10px'>$matchCount</span>" +
+                    "<br><small>$meta</small></html>"
+                else ->
+                    "<html><b>$title</b><br><small>$meta</small></html>"
+            }
             sessionList.addItem(session, displayText, index == 0)
         }
-        setStatus("${sessions.size} session${if (sessions.size != 1) "s" else ""} found.")
+
+        val statusText = if (matcher != null) {
+            val n = sessions.count { sessionMatchCount(it, matcher) > 0 }
+            "$n of ${sessions.size} session${if (sessions.size != 1) "s" else ""} match."
+        } else {
+            "${sessions.size} session${if (sessions.size != 1) "s" else ""} found."
+        }
+        setStatus(statusText)
+
         if (sessions.isNotEmpty()) {
-            sessionList.selectedIndex = 0
+            val selectIdx = if (matcher != null) {
+                val firstMatch = sessions.indexOfFirst { sessionMatchCount(it, matcher) > 0 }
+                if (firstMatch >= 0) firstMatch else 0
+            } else 0
+            sessionList.selectedIndex = selectIdx
             updateMessagePreview()
         }
     }
@@ -239,14 +325,42 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
     }
 
     private fun rebuildMessageList(checkedStates: BooleanArray) {
+        val matcher = activeQuery?.let { SearchMatcher(it) }
+        val dimColor = JBUI.CurrentTheme.Label.disabledForeground()
+        val dimHex = "#%02x%02x%02x".format(dimColor.red, dimColor.green, dimColor.blue)
         messageList.clear()
+        var firstMatchIndex = -1
+
         currentMessages.forEachIndexed { i, msg ->
             val roleColor = if (msg.role == Role.USER) "#6ea8fe" else "#75b798"
             val roleName = msg.role.displayName
-            val preview = truncate(msg.previewText.replace("\n", " "), 55).escapeHtml()
-            val displayText = "<html><span style='color:$roleColor'><b>$roleName:</b></span> $preview</html>"
+
+            val firstTextBlock = msg.textBlocks.firstOrNull()
+            val plain = truncate((firstTextBlock ?: msg.previewText).replace("\n", " "), 55)
+
+            val (previewHtml, msgMatches) = if (matcher != null && firstTextBlock != null) {
+                val fullContent: String? = when {
+                    msg.role == Role.USER   && searchPrompts.isSelected   -> msg.textBlocks.joinToString(" ")
+                    msg.role == Role.CLAUDE && searchResponses.isSelected -> msg.textBlocks.joinToString(" ")
+                    else -> null
+                }
+                if (fullContent != null && matcher.matches(fullContent)) {
+                    plain.buildHighlightedHtml(matcher.matchRanges(plain)) to true
+                } else {
+                    plain.escapeHtml() to false
+                }
+            } else {
+                plain.escapeHtml() to false
+            }
+
+            if (msgMatches && firstMatchIndex < 0) firstMatchIndex = i
+            val dimStyle = if (matcher != null && !msgMatches) "color:$dimHex;" else ""
+            val displayText = "<html><span style='$dimStyle'><span style='color:$roleColor'>" +
+                    "<b>$roleName:</b></span> $previewHtml</span></html>"
             messageList.addItem(msg, displayText, checkedStates.getOrElse(i) { defaultChecked(msg) })
         }
+
+        if (firstMatchIndex >= 0) messageList.ensureIndexIsVisible(firstMatchIndex)
     }
 
     /**
@@ -262,6 +376,50 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
         val allSelected = matchingIndices.all { checkedStates[it] }
         matchingIndices.forEach { checkedStates[it] = !allSelected }
         rebuildMessageList(checkedStates)
+    }
+
+    private fun scheduleSearch() {
+        debounceTimer?.stop()
+        debounceTimer = javax.swing.Timer(300) { applySearch() }.also {
+            it.isRepeats = false
+            it.start()
+        }
+    }
+
+    private fun applySearch() {
+        val raw = searchField.text.trim()
+        clearButton.isVisible = raw.isNotEmpty()
+        if (raw.isEmpty()) {
+            activeQuery = null
+            searchField.border = defaultSearchBorder
+            searchField.toolTipText = null
+            populateSessionList()
+            return
+        }
+        try {
+            activeQuery = QueryParser(raw).parse()
+            searchField.border = defaultSearchBorder
+            searchField.toolTipText = null
+        } catch (e: QueryParseException) {
+            activeQuery = null
+            searchField.border = BorderFactory.createLineBorder(com.intellij.ui.JBColor.RED, 1)
+            searchField.toolTipText = e.message
+        }
+        populateSessionList()
+    }
+
+    private fun sessionMatchCount(session: ClaudeCodeSession, matcher: SearchMatcher): Int {
+        var count = 0
+        if (searchTitle.isSelected && matcher.matches(session.title)) count++
+        for (msg in session.messages) {
+            val texts: List<String> = when {
+                msg.role == Role.USER   && searchPrompts.isSelected   -> msg.textBlocks
+                msg.role == Role.CLAUDE && searchResponses.isSelected -> msg.textBlocks
+                else -> emptyList()
+            }
+            if (texts.any { matcher.matches(it) }) count++
+        }
+        return count
     }
 
     private fun selectedSession(): ClaudeCodeSession? {
