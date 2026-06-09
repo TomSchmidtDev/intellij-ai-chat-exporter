@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.7.1] - 2026-06-09
+
+### Fixed
+- Claude Code session titles now displayed correctly (were shown as GUIDs due to wrong JSONL field name)
+
 ## [1.7.0] - 2026-06-09
 
 ### Added
