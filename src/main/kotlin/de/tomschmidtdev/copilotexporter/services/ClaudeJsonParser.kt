@@ -32,8 +32,8 @@ object ClaudeJsonParser {
             if (entry == null || !entry.isObject) continue
 
             when (entry["type"]?.asText()) {
-                "ai-title" -> {
-                    entry["aiTitle"]?.asText()?.takeIf { it.isNotBlank() }?.let { title = it }
+                "custom-title" -> {
+                    entry["customTitle"]?.asText()?.takeIf { it.isNotBlank() }?.let { title = it }
                 }
                 "user" -> {
                     if (entry["isSidechain"]?.asBoolean() == true) continue

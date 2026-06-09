@@ -20,7 +20,7 @@ class ClaudeJsonParserTest {
     // -------------------------------------------------------------------------
 
     private fun aiTitle(title: String, sessionId: String = "s1") =
-        mapper.writeValueAsString(mapOf("type" to "ai-title", "aiTitle" to title, "sessionId" to sessionId))
+        mapper.writeValueAsString(mapOf("type" to "custom-title", "customTitle" to title, "sessionId" to sessionId))
 
     private fun userMsg(content: Any, sidechain: Boolean = false) =
         mapper.writeValueAsString(mapOf(
