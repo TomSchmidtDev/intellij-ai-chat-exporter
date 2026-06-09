@@ -24,3 +24,4 @@ Thumbs.db
 # Samples (lokale Test-Dateien, nicht Teil des Projekts)
 samples/
 .superpowers/
+docs/superpowers/
