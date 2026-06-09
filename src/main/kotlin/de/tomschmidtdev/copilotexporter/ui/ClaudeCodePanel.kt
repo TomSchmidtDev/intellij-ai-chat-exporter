@@ -279,9 +279,9 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
                 isDimmed ->
                     "<html><span style='color:$dimHex'><b>$title</b><br><small>$meta</small></span></html>"
                 matcher != null ->
-                    "<html><b>$title</b> <span style='background:#b8860b;color:#fff;" +
+                    "<html><span style='background:#b8860b;color:#fff;" +
                     "padding:1px 5px;border-radius:8px;font-size:10px'>$matchCount</span>" +
-                    "<br><small>$meta</small></html>"
+                    " <b>$title</b><br><small>$meta</small></html>"
                 else ->
                     "<html><b>$title</b><br><small>$meta</small></html>"
             }
