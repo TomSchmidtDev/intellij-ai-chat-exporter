@@ -118,7 +118,11 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
         isBorderPainted = false
         isContentAreaFilled = false
         toolTipText = "Clear search"
-        addActionListener { searchField.text = "" }
+        addActionListener {
+            searchField.text = ""       // triggers DocumentListener → scheduleSearch() → debounceTimer = new Timer
+            debounceTimer?.stop()       // cancel the just-created timer
+            applySearch()               // apply immediately
+        }
     }
     private val searchPrompts   = JCheckBox("Prompts", true)
     private val searchResponses = JCheckBox("Responses", true)
@@ -319,6 +323,9 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
             return
         }
 
+        val dimColor = JBUI.CurrentTheme.Label.disabledForeground()
+        val dimHex = "#%02x%02x%02x".format(dimColor.red, dimColor.green, dimColor.blue)
+
         sessions.forEachIndexed { index, session ->
             val matchCount = matcher?.let { sessionMatchCount(session, it) } ?: -1
             val isDimmed = matcher != null && matchCount == 0
@@ -327,7 +334,7 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
 
             val displayText = when {
                 isDimmed ->
-                    "<html><span style='color:#666'><b>$title</b><br><small>$meta</small></span></html>"
+                    "<html><span style='color:$dimHex'><b>$title</b><br><small>$meta</small></span></html>"
                 matcher != null ->
                     "<html><b>$title</b> <span style='background:#b8860b;color:#fff;" +
                     "padding:1px 5px;border-radius:8px;font-size:10px'>$matchCount</span>" +
@@ -347,7 +354,11 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
         setStatus(statusText)
 
         if (sessions.isNotEmpty()) {
-            sessionList.selectedIndex = 0
+            val selectIdx = if (matcher != null) {
+                val firstMatch = sessions.indexOfFirst { sessionMatchCount(it, matcher) > 0 }
+                if (firstMatch >= 0) firstMatch else 0
+            } else 0
+            sessionList.selectedIndex = selectIdx
             updateMessagePreview()
         }
     }
@@ -378,13 +389,13 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
             val plain = truncate(raw, 55)
 
             val (previewHtml, msgMatches) = if (matcher != null) {
-                val searchable: String? = when {
-                    message.role == Role.USER      && searchPrompts.isSelected   -> plain
-                    message.role == Role.ASSISTANT && searchResponses.isSelected -> plain
+                val fullContent: String? = when {
+                    message.role == Role.USER      && searchPrompts.isSelected   -> raw
+                    message.role == Role.ASSISTANT && searchResponses.isSelected -> raw
                     else -> null
                 }
-                if (searchable != null && matcher.matches(searchable)) {
-                    searchable.buildHighlightedHtml(matcher.matchRanges(searchable)) to true
+                if (fullContent != null && matcher.matches(fullContent)) {
+                    plain.buildHighlightedHtml(matcher.matchRanges(plain)) to true
                 } else {
                     plain.escapeHtml() to false
                 }
