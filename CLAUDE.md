@@ -50,7 +50,8 @@ settings/               ExporterSettings (persistent), ColorProfile (10 presets 
 The `<slug>` is the absolute project path with all path separators replaced by `-` (e.g. `/Users/alice/my-app` → `-Users-alice-my-app`). Each `.jsonl` file is one session identified by its UUID filename.
 
 **JSONL entry types used:**
-- `custom-title` → session title (`customTitle` field)
+- `ai-title` → session title (`aiTitle` field) — older Claude Code versions
+- `custom-title` → session title (`customTitle` field) — newer Claude Code versions
 - `user` → user turn; `message.content` is a string or array of blocks
 - `assistant` → AI turn; `message.content` is always an array of typed blocks
 - All other types (`attachment`, `system`, `file-history-snapshot`, etc.) are ignored

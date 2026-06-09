@@ -20,6 +20,9 @@ class ClaudeJsonParserTest {
     // -------------------------------------------------------------------------
 
     private fun aiTitle(title: String, sessionId: String = "s1") =
+        mapper.writeValueAsString(mapOf("type" to "ai-title", "aiTitle" to title, "sessionId" to sessionId))
+
+    private fun customTitle(title: String, sessionId: String = "s1") =
         mapper.writeValueAsString(mapOf("type" to "custom-title", "customTitle" to title, "sessionId" to sessionId))
 
     private fun userMsg(content: Any, sidechain: Boolean = false) =
@@ -75,6 +78,13 @@ class ClaudeJsonParserTest {
     @Test
     fun `uses ai-title when present`() {
         val file = writeSession(aiTitle("My Session"), userMsg("hi"), assistantMsg(listOf(textBlock("hey"))))
+        val session = ClaudeJsonParser.parse(file)!!
+        assertEquals("My Session", session.title)
+    }
+
+    @Test
+    fun `uses custom-title when present`() {
+        val file = writeSession(customTitle("My Session"), userMsg("hi"), assistantMsg(listOf(textBlock("hey"))))
         val session = ClaudeJsonParser.parse(file)!!
         assertEquals("My Session", session.title)
     }

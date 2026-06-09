@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.7.1"
+version = "1.7.2"
 
 kotlin {
     jvmToolchain(21)
@@ -27,6 +27,11 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.7.2</b>
+            <ul>
+                <li>Fixed: Claude Code session titles now read from Claude Desktop metadata — sessions that have an auto-generated title in Claude Desktop are now displayed with that name instead of the UUID</li>
+                <li>Fixed: both ai-title (older) and custom-title (newer) JSONL title formats are now supported</li>
+            </ul>
             <b>1.7.1</b>
             <ul>
                 <li>Fixed: Claude Code session titles now shown correctly (were displayed as GUIDs)</li>

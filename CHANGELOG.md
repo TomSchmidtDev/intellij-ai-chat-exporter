@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.7.2] - 2026-06-09
+
+### Fixed
+- Claude Code session titles now read from Claude Desktop metadata: sessions with an auto-generated title in Claude Desktop are displayed with that name instead of the UUID
+- Both `ai-title` (older CLI format) and `custom-title` (newer CLI format) JSONL entries are now recognized
+
 ## [1.7.1] - 2026-06-09
 
 ### Fixed
