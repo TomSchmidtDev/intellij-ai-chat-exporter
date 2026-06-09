@@ -264,11 +264,13 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
             return
         }
 
+        val matchCounts: List<Int>? = matcher?.let { m -> sessions.map { sessionMatchCount(it, m) } }
+
         val dimColor = JBUI.CurrentTheme.Label.disabledForeground()
         val dimHex = "#%02x%02x%02x".format(dimColor.red, dimColor.green, dimColor.blue)
 
         sessions.forEachIndexed { index, session ->
-            val matchCount = matcher?.let { sessionMatchCount(session, it) } ?: -1
+            val matchCount = matchCounts?.get(index) ?: -1
             val isDimmed = matcher != null && matchCount == 0
             val title = truncate(session.title, 30).escapeHtml()
             val meta = "${session.formattedDate} · ${session.messageCount}"
@@ -286,8 +288,8 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
             sessionList.addItem(session, displayText, index == 0)
         }
 
-        val statusText = if (matcher != null) {
-            val n = sessions.count { sessionMatchCount(it, matcher) > 0 }
+        val statusText = if (matchCounts != null) {
+            val n = matchCounts.count { it > 0 }
             "$n of ${sessions.size} session${if (sessions.size != 1) "s" else ""} match."
         } else {
             "${sessions.size} session${if (sessions.size != 1) "s" else ""} found."
@@ -295,8 +297,8 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
         setStatus(statusText)
 
         if (sessions.isNotEmpty()) {
-            val selectIdx = if (matcher != null) {
-                val firstMatch = sessions.indexOfFirst { sessionMatchCount(it, matcher) > 0 }
+            val selectIdx = if (matchCounts != null) {
+                val firstMatch = matchCounts.indexOfFirst { it > 0 }
                 if (firstMatch >= 0) firstMatch else 0
             } else 0
             sessionList.selectedIndex = selectIdx
