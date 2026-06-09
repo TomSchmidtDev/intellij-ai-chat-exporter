@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.6.4"
+version = "1.7.0"
 
 kotlin {
     jvmToolchain(21)
@@ -27,6 +27,13 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.7.0</b>
+            <ul>
+                <li>New: search bar in both Copilot and Claude Code tabs — filter sessions live as you type</li>
+                <li>New: boolean query syntax: AND, OR, phrase matching with quotes, and grouping with parentheses</li>
+                <li>New: scope toggles to search prompts, responses, and/or session titles</li>
+                <li>New: match-count badge on sessions with results; matching messages highlighted in the preview panel</li>
+            </ul>
             <b>1.6.4</b>
             <ul>
                 <li>Fixed: plugin version is now embedded at build time — eliminates all internal and deprecated PluginManager API usages (Marketplace compatibility)</li>

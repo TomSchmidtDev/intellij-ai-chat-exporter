@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.7.0] - 2026-06-09
+
+### Added
+- Search bar in both Copilot and Claude Code tabs: filter sessions live as you type
+- Boolean query syntax: `AND`, `OR`, phrase matching with quotes, and grouping with parentheses
+- Scope toggles to search prompts, responses, and/or session titles
+- Match-count badge on sessions with results; matching messages highlighted in the preview panel
+
 ## [1.6.4] - 2026-05-30
 ### Fixed
 - Plugin version is now embedded at build time via a generated `BuildConfig` constant — eliminates all internal and deprecated `PluginManager` API usages, resolving JetBrains Marketplace compatibility warnings for IntelliJ 2026.2+
