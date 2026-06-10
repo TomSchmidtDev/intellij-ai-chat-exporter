@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.7.3] - 2026-06-10
+
+### Fixed
+- Search match-count badge now visible on both light and dark IDE themes (Swing BasicHTML CSS color leakage fix)
+
 ## [1.7.2] - 2026-06-09
 
 ### Fixed

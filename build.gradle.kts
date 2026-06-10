@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.7.2"
+version = "1.7.3"
 
 kotlin {
     jvmToolchain(21)
@@ -27,6 +27,10 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.7.3</b>
+            <ul>
+                <li>Fixed: search match-count badge now visible on both light and dark IDE themes</li>
+            </ul>
             <b>1.7.2</b>
             <ul>
                 <li>Fixed: Claude Code session titles now read from Claude Desktop metadata — sessions that have an auto-generated title in Claude Desktop are now displayed with that name instead of the UUID</li>
