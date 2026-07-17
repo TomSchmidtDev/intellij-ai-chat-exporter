@@ -21,7 +21,7 @@ class ExporterSettingsConfigurable : Configurable {
 
     private var panel: ExporterSettingsPanel? = null
 
-    override fun getDisplayName(): String = "Copilot Chat Exporter"
+    override fun getDisplayName(): String = "AI Chat Exporter"
 
     /**
      * Wird beim ersten Öffnen der Settings-Seite aufgerufen.

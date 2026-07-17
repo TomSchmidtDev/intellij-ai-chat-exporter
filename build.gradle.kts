@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.7.5"
+version = "1.7.6"
 
 kotlin {
     jvmToolchain(21)
@@ -20,13 +20,21 @@ java {
 intellijPlatform {
     pluginConfiguration {
         id = "de.tomschmidtdev.copilot-chat-exporter"
-        name = "Copilot Chat Exporter"
+        // This is the Marketplace / plugin-list display name. The `patchPluginXml` task
+        // overwrites the <name> tag in src/main/resources/META-INF/plugin.xml with this
+        // value at build time — editing plugin.xml directly has no effect, edit here.
+        name = "AI Chat Exporter for Copilot & Claude"
         version = project.version.toString()
 
         description = providers.fileContents(layout.projectDirectory.file("DESCRIPTION.html")).asText
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.7.6</b>
+            <ul>
+                <li>Renamed the plugin to "AI Chat Exporter for Copilot &amp; Claude" on the Marketplace, now that Claude Code is also supported — the Settings page is labeled simply "AI Chat Exporter"</li>
+                <li>Fixed: the Settings (gear) button was missing from the Claude Code tab — it's now available on both tabs</li>
+            </ul>
             <b>1.7.5</b>
             <ul>
                 <li>Security: upgraded jackson-databind/jackson-core/jackson-annotations to 2.18.9, fixing four Dependabot-reported CVEs (two high, two moderate) in polymorphic-type-validator bypass, SSRF via InetSocketAddress deserialization, and a @JsonIgnoreProperties bypass — none of these deserialize untrusted input in this plugin, but the fix removes the vulnerable code paths from the shipped jar</li>

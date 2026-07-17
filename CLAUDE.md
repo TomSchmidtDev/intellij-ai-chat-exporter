@@ -143,6 +143,16 @@ When bumping a version, always update **all three** in the same commit:
 2. `CHANGELOG.md` → new `## [X.Y.Z] - YYYY-MM-DD` section
 3. `build.gradle.kts` → `changeNotes` block (shown on JetBrains Marketplace "What's New" tab)
 
+## Plugin display name (Marketplace + IDE plugin list)
+The Marketplace/plugin-list display name is set via `pluginConfiguration.name` in
+`build.gradle.kts`, **not** the `<name>` tag in `src/main/resources/META-INF/plugin.xml` —
+the Gradle IntelliJ Platform plugin's `patchPluginXml` task overwrites `<name>` at build
+time with the `build.gradle.kts` value. Editing `plugin.xml` directly has no effect; always
+edit `build.gradle.kts`. (The Settings-page label is a separate thing — see
+`ExporterSettingsConfigurable.getDisplayName()` and the `applicationConfigurable
+displayName` attribute in `plugin.xml`, both of which *are* the real source, unaffected by
+`patchPluginXml`.)
+
 ## Marketplace gallery screenshots (manual step!)
 The JetBrains Marketplace plugin page has its own image gallery, **separate** from the
 plugin ZIP and from `screenshots/` in this repo:

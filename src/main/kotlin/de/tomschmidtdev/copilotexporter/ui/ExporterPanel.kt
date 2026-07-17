@@ -184,7 +184,7 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
 
         // Zahnrad-Button öffnet direkt die Settings-Seite des Plugins
         val settingsBtn = JButton(AllIcons.General.Settings).apply {
-            toolTipText = "Open Copilot Chat Exporter settings"
+            toolTipText = "Open AI Chat Exporter settings"
             border = JBUI.Borders.empty(3, 6)
             isBorderPainted = false
             isContentAreaFilled = false

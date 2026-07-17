@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.7.6] - 2026-07-17
+
+### Changed
+- Renamed the plugin to "AI Chat Exporter for Copilot & Claude" on the JetBrains Marketplace and IDE plugin list, reflecting that Claude Code has been supported for a while now — the Settings page keeps the shorter "AI Chat Exporter" label
+
+### Fixed
+- The Settings (gear) button was missing from the toolbar on the Claude Code tab (it was only present on the Copilot tab) — both tabs now open the same settings page
+- Settings button tooltip updated to match the new name
+
 ## [1.7.5] - 2026-07-17
 
 ### Security

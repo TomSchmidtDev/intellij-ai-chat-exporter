@@ -1,7 +1,7 @@
 <idea-plugin require-restart="false">
 
     <id>de.tomschmidtdev.copilot-chat-exporter</id>
-    <name>Copilot Chat Exporter</name>
+    <name>AI Chat Exporter for Copilot &amp; Claude</name>
 
     <vendor url="https://github.com/TomSchmidtDev">TomSchmidtDev</vendor>
 
@@ -53,7 +53,7 @@
                 parentId="tools"
                 instance="de.tomschmidtdev.copilotexporter.settings.ExporterSettingsConfigurable"
                 id="de.tomschmidtdev.copilotexporter.settings"
-                displayName="Copilot Chat Exporter"/>
+                displayName="AI Chat Exporter"/>
 
     </extensions>
 

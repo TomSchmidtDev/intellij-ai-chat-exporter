@@ -5,6 +5,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileChooser.FileChooserFactory
 import com.intellij.openapi.fileChooser.FileSaverDescriptor
+import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -27,6 +28,7 @@ import de.tomschmidtdev.copilotexporter.search.SearchNode
 import de.tomschmidtdev.copilotexporter.search.buildHighlightedHtml
 import de.tomschmidtdev.copilotexporter.services.ClaudeCodeReaderService
 import de.tomschmidtdev.copilotexporter.services.ClaudeJsonParser
+import de.tomschmidtdev.copilotexporter.settings.ExporterSettingsConfigurable
 import java.awt.BorderLayout
 import java.awt.FlowLayout
 import javax.swing.*
@@ -125,9 +127,22 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
             })
         }
 
+        // Zahnrad-Button öffnet direkt die Settings-Seite des Plugins (analog zu ExporterPanel)
+        val settingsBtn = JButton(AllIcons.General.Settings).apply {
+            toolTipText = "Open AI Chat Exporter settings"
+            border = JBUI.Borders.empty(3, 6)
+            isBorderPainted = false
+            isContentAreaFilled = false
+            addActionListener {
+                ShowSettingsUtil.getInstance()
+                    .showSettingsDialog(project, ExporterSettingsConfigurable::class.java)
+            }
+        }
+
         val toolbar = JPanel(BorderLayout()).apply {
             border = separatorBorder
             add(leftButtons, BorderLayout.WEST)
+            add(settingsBtn, BorderLayout.EAST)
         }
 
         val sessionPanel = JPanel(BorderLayout()).apply {
