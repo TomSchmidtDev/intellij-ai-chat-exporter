@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.7.4] - 2026-07-17
+
+### Fixed
+- Newest Copilot chat/agent sessions no longer silently disappear from the export list. GitHub Copilot occasionally changes its internal Nitrite schema between plugin versions (e.g. dropping the legacy `NtChatSession`/`NtTurn` entities in favor of a unified agent schema); sessions are now also matched against turns embedded directly in the session document as a fallback, and turns whose content can't be parsed are exported as a placeholder instead of causing the whole session to be dropped (thanks to Cal Briden for reporting this!)
+
 ## [1.7.3] - 2026-06-10
 
 ### Fixed

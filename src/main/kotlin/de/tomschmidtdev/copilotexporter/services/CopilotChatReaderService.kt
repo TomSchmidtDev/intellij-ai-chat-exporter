@@ -144,14 +144,20 @@ class CopilotChatReaderService(private val project: Project) {
                             report.appendLine("  Session: $title [$id]")
                             report.appendLine("    Created: ${formatTimestamp(doc.get("createdAt"))}")
 
-                            val sessionTurns = (turnsBySession[id] ?: emptyList())
+                            val joinedTurns = turnsBySession[id] ?: emptyList()
+                            val embeddedTurns = (doc.get("turns") as? List<*>)?.filterIsInstance<Document>() ?: emptyList()
+                            val usedEmbeddedFallback = joinedTurns.isEmpty() && embeddedTurns.isNotEmpty()
+                            val sessionTurns = (joinedTurns.ifEmpty { embeddedTurns })
                                 .sortedBy { (it.get("createdAt") as? Number)?.toLong() ?: 0L }
-                            val activeTurns = sessionTurns.filter { it.get("deletedAt") == null }
+                            val activeTurns = sessionTurns.filterNot { isTurnDeleted(it) }
                             val deletedCount = sessionTurns.size - activeTurns.size
 
                             if (sessionTurns.isEmpty()) {
                                 report.appendLine("    Turns: 0  → FILTERED (no turns, will not appear in plugin)")
                             } else {
+                                if (usedEmbeddedFallback) {
+                                    report.appendLine("    (no turns in separate collection — using turns embedded in session document)")
+                                }
                                 val deletedNote = if (deletedCount > 0) ", $deletedCount deleted" else ""
                                 report.appendLine("    Turns: ${sessionTurns.size} total, ${activeTurns.size} active$deletedNote")
                                 activeTurns.forEach { turn ->
@@ -256,14 +262,27 @@ class CopilotChatReaderService(private val project: Project) {
      *     id: String
      *     name.value: String   (Dot-Notation! Kein verschachteltes Objekt)
      *     createdAt: Long (Unix ms)
+     *     turns: List<Document>  (neuere Copilot-Versionen betten Turns zusätzlich
+     *                              direkt im Session-Dokument ein — s. u.)
      *
      *   NtAgentTurn / NtTurn / NtEditTurn:
      *     sessionId: String  → Fremdschlüssel
      *     request.stringContent: String  (User-Text, direkt)
      *     response.stringContent: String (Assistant-Text, kann leer sein)
      *     response.contents: String      (Agent-Modus: komplex JSON-kodiert)
-     *     deletedAt: Long? (null = aktiver Turn)
+     *     deletedAt: Long? (null oder 0 = aktiver Turn)
      *     createdAt: Long
+     *
+     * LERNHINWEIS (Bugfix): Copilot ändert das interne Nitrite-Schema mit jeder
+     * größeren Plugin-Version (z. B. Wegfall von NtChatSession/NtTurn zugunsten
+     * eines vereinheitlichten Agent-Schemas). Damit neu erstellte Sessions dabei
+     * nicht kommentarlos aus der Exportliste verschwinden, arbeiten wir mit zwei
+     * Fallback-Ebenen:
+     *   1. Falls die separate Turn-Collection keine passenden Einträge liefert,
+     *      versuchen wir die im Session-Dokument eingebetteten Turns.
+     *   2. Falls für einen gefundenen Turn weder User- noch Assistant-Text
+     *      extrahiert werden kann, wird ein Platzhalter statt eines stillen
+     *      Verwerfens der ganzen Session eingefügt.
      */
     private fun buildChatSession(
         sessionDoc: Document,
@@ -276,9 +295,18 @@ class CopilotChatReaderService(private val project: Project) {
         // LERNHINWEIS: Nitrite 4.x hat keine serverseitige Filterabfrage über openMap().
         // Wir filtern die Turns lazy per Sequence, sodass nicht-passende Dokumente
         // nicht im Heap gehalten werden. sortedBy materialisiert nur die gefilterten Turns.
-        val turns = turnMap.values().asSequence()
-            .filter { turn: Document -> turn.get("sessionId") == id && turn.get("deletedAt") == null }
-            .sortedBy { turn: Document -> (turn.get("createdAt") as? Number)?.toLong() ?: 0L }
+        val joinedTurns = turnMap.values().asSequence()
+            .filter { turn: Document -> turn.get("sessionId") == id && !isTurnDeleted(turn) }
+            .toList()
+
+        // Fallback-Ebene 1: eingebettete Turns im Session-Dokument selbst, falls
+        // die separate Turn-Collection (noch) nichts Passendes enthält.
+        val turns = (joinedTurns.ifEmpty {
+            (sessionDoc.get("turns") as? List<*>)
+                ?.filterIsInstance<Document>()
+                ?.filterNot { isTurnDeleted(it) }
+                ?: emptyList()
+        }).sortedBy { turn: Document -> (turn.get("createdAt") as? Number)?.toLong() ?: 0L }
 
         val messages = mutableListOf<ChatMessage>()
         var index = 0
@@ -299,16 +327,23 @@ class CopilotChatReaderService(private val project: Project) {
             if (!assistantText.isNullOrBlank()) {
                 messages.add(ChatMessage(Role.ASSISTANT, assistantText, index++, turnTs))
             }
+            // Fallback-Ebene 2: Turn existiert, aber kein Text extrahierbar (z. B.
+            // unbekanntes Content-Format einer neueren Copilot-Version) → Platzhalter
+            // statt die ganze Session stillschweigend zu verwerfen.
+            if (userText.isNullOrBlank() && assistantText.isNullOrBlank()) {
+                log.debug("Session '$title' [$id]: turn at $turnTs has no extractable text")
+                messages.add(ChatMessage(Role.ASSISTANT, "[Content could not be read — unsupported format]", index++, turnTs))
+            }
         }
 
-        if (messages.isEmpty()) {
-            if (turnCount > 0) {
-                log.debug("Session '$title' [$id]: $turnCount active turn(s) found but no text could be extracted")
-            }
-            return null
-        }
+        if (messages.isEmpty()) return null
 
         return ChatSession(id = id, title = title, createdAt = createdAt, messages = messages, lastModifiedAt = lastModifiedAt)
+    }
+
+    private fun isTurnDeleted(turn: Document): Boolean {
+        val deletedAt = (turn.get("deletedAt") as? Number)?.toLong() ?: return false
+        return deletedAt > 0L
     }
 
     private fun extractUserText(turn: Document): String? {

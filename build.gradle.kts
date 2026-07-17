@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.7.3"
+version = "1.7.4"
 
 kotlin {
     jvmToolchain(21)
@@ -27,6 +27,10 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.7.4</b>
+            <ul>
+                <li>Fixed: newest Copilot chat/agent sessions no longer disappear from the export list when GitHub Copilot changes its internal storage format between plugin versions — sessions with turns that can't be fully parsed now still appear (with a placeholder) instead of being silently dropped</li>
+            </ul>
             <b>1.7.3</b>
             <ul>
                 <li>Fixed: search match-count badge now visible on both light and dark IDE themes</li>
