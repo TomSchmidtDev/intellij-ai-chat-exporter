@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.7.4"
+version = "1.7.5"
 
 kotlin {
     jvmToolchain(21)
@@ -27,6 +27,10 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.7.5</b>
+            <ul>
+                <li>Security: upgraded jackson-databind/jackson-core/jackson-annotations to 2.18.9, fixing four Dependabot-reported CVEs (two high, two moderate) in polymorphic-type-validator bypass, SSRF via InetSocketAddress deserialization, and a @JsonIgnoreProperties bypass — none of these deserialize untrusted input in this plugin, but the fix removes the vulnerable code paths from the shipped jar</li>
+            </ul>
             <b>1.7.4</b>
             <ul>
                 <li>Fixed: newest Copilot chat/agent sessions no longer disappear from the export list when GitHub Copilot changes its internal storage format between plugin versions — sessions with turns that can't be fully parsed now still appear (with a placeholder) instead of being silently dropped</li>
@@ -235,17 +239,19 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    // Force jackson >= 2.18.6 to fix CVE: Number Length Constraint Bypass (moderate DoS).
-    // jackson 2.17.1 (pulled in transitively by nitrite-jackson-mapper) is vulnerable.
+    // Force jackson >= 2.18.9 to fix CVEs: PTV generic-parameter bypass (CVE-2026-54512, high),
+    // PTV array-subtype bypass (CVE-2026-54513, high), InetSocketAddress SSRF (CVE-2026-54514,
+    // moderate), case-insensitive @JsonIgnoreProperties bypass (CVE-2026-54515, moderate; fixed
+    // only in 2.18.9+). jackson 2.17.1 (pulled in transitively by nitrite-jackson-mapper) is vulnerable.
     constraints {
-        implementation("com.fasterxml.jackson.core:jackson-core:2.18.6") {
-            because("jackson-core < 2.18.6 is vulnerable to a DoS via async parser (GitHub advisory)")
+        implementation("com.fasterxml.jackson.core:jackson-core:2.18.9") {
+            because("align jackson-core with forced jackson-databind version")
         }
-        implementation("com.fasterxml.jackson.core:jackson-databind:2.18.6") {
-            because("align jackson-databind with forced jackson-core version")
+        implementation("com.fasterxml.jackson.core:jackson-databind:2.18.9") {
+            because("jackson-databind < 2.18.9 is vulnerable to several PTV/deserialization bypasses (GitHub Dependabot alerts)")
         }
-        implementation("com.fasterxml.jackson.core:jackson-annotations:2.18.6") {
-            because("align jackson-annotations with forced jackson-core version")
+        implementation("com.fasterxml.jackson.core:jackson-annotations:2.18.9") {
+            because("align jackson-annotations with forced jackson-databind version")
         }
     }
 }

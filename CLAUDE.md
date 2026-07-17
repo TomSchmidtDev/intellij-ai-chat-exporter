@@ -85,6 +85,19 @@ Three session types, each with their own DB file:
 - Fields use **dot notation**: `"name.value"`, `"request.stringContent"`, `"response.contents"`.
 - Copilot locks the DB file exclusively → always **copy to a temp file** before opening.
 - Requires **Nitrite 4.x** (H2 MVStore Write-Format 3). Nitrite 3.x uses H2 1.4.x and cannot read these files.
+- **Copilot's internal schema is not stable across plugin versions** — collection/entity class names have
+  changed before (e.g. `NtChatSession`/`NtTurn` for `chat-sessions` no longer exist as of Copilot 1.13.x;
+  regular chat sessions now live in `chat-agent-sessions`/`NtAgentSession` alongside agent tasks). Since we
+  read the raw store by hardcoded class name, a Copilot schema change can make `buildChatSession()` in
+  `CopilotChatReaderService` unable to join a session to its turns, or unable to parse a turn's content.
+  To avoid silently dropping sessions when this happens, it has two fallback layers: (1) if the separate
+  turn collection has no matches, fall back to turns embedded directly in the session document (`"turns"`
+  field on `NtAgentSession`); (2) if a turn is found but no text can be extracted from it, export a
+  placeholder message instead of dropping the whole session. `deletedAt` is treated as "active" for both
+  `null` and `0`, not just `null`.
+- If sessions still go missing after a Copilot update, use the panel's diagnose/report action
+  (`CopilotChatReaderService.diagnose()`) first — it prints per-session turn counts and extraction status,
+  including whether the embedded-turns fallback was used — before assuming a fix is needed.
 
 ### Agent/Edit message format
 Agent and edit-mode responses are triple-nested JSON stored in `response.contents`:
@@ -129,6 +142,17 @@ When bumping a version, always update **all three** in the same commit:
 1. `build.gradle.kts` → `version = "X.Y.Z"`
 2. `CHANGELOG.md` → new `## [X.Y.Z] - YYYY-MM-DD` section
 3. `build.gradle.kts` → `changeNotes` block (shown on JetBrains Marketplace "What's New" tab)
+
+## Marketplace gallery screenshots (manual step!)
+The JetBrains Marketplace plugin page has its own image gallery, **separate** from the
+plugin ZIP and from `screenshots/` in this repo:
+- `./gradlew publishPlugin` only uploads the signed ZIP + `changeNotes` (embedded in `plugin.xml`).
+  It does **not** update the Marketplace gallery images — there is no Gradle/API support for that.
+- `screenshots/*.png` in this repo are referenced only by `README.md` / `README.de.md`, which
+  GitHub renders directly — these update automatically on push.
+- Whenever a UI change makes the screenshots in `screenshots/` outdated, after releasing,
+  manually re-upload the updated `*-1200x760.png` images via
+  `https://plugins.jetbrains.com/plugin/<id>/edit` → "Images". This cannot be automated.
 
 ## Plugin icon
 - Tool window icon (13×13): `src/main/resources/icons/pluginIcon.svg` — speech-bubble style

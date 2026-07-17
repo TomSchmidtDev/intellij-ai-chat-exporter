@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.7.5] - 2026-07-17
+
+### Security
+- Upgraded `jackson-databind`, `jackson-core`, and `jackson-annotations` from 2.18.6 to 2.18.9, resolving four Dependabot alerts against `jackson-databind`:
+  - [GHSA-j3rv-43j4-c7qm](https://github.com/advisories/GHSA-j3rv-43j4-c7qm) (high, CVE-2026-54512) — PolymorphicTypeValidator bypass via generic type parameters
+  - [GHSA-rmj7-2vxq-3g9f](https://github.com/advisories/GHSA-rmj7-2vxq-3g9f) (high, CVE-2026-54513) — PolymorphicTypeValidator array-subtype allowlist bypass
+  - [GHSA-hgj6-7826-r7m5](https://github.com/advisories/GHSA-hgj6-7826-r7m5) (moderate, CVE-2026-54514) — SSRF via eager DNS resolution in `InetSocketAddress` deserialization
+  - [GHSA-5jmj-h7xm-6q6v](https://github.com/advisories/GHSA-5jmj-h7xm-6q6v) (moderate, CVE-2026-54515) — case-insensitive deserialization bypasses per-property `@JsonIgnoreProperties`
+  - This plugin does not enable polymorphic typing or deserialize untrusted JSON via jackson-databind, so none of these were directly exploitable here; the upgrade removes the vulnerable code from the shipped jar regardless.
+
 ## [1.7.4] - 2026-07-17
 
 ### Fixed
