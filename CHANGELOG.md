@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.8.0] - 2026-07-21
+
+### Added
+- Copilot sessions that are started from the IDE but run as CLI/background agents now display their real conversation. These sessions only keep a metadata stub in the local Nitrite store — the actual prompts and answers live in the Copilot CLI event log (`~/.copilot/session-state/<id>/events.jsonl`). The exporter now reads that event log as a fallback, so instead of showing just the first prompt followed by "[No local turns found in Copilot DB for this session]", the full user/assistant exchange is exported. Runtime-injected messages (skill/tool context, identified by a `source` field) and tool-only assistant turns (empty content) are skipped.
+
+### Fixed
+- Some Copilot agent/edit-mode answers were exported as raw JSON instead of readable text. Content-filter responses (`Filter`) and server errors (`Error`) now show their human-readable `message`; assistant turns that contain only tool calls (all rounds have an empty `reply`) or an empty object are now treated as blank instead of dumping the raw JSON structure into the export.
+
 ## [1.7.6] - 2026-07-17
 
 ### Changed
