@@ -173,9 +173,9 @@ class CopilotJsonParserTest {
     }
 
     @Test
-    fun `empty object returns original string`() {
+    fun `empty object returns empty string`() {
         val raw = "{}"
-        assertEquals(raw, CopilotJsonParser.parseAgentContents(raw))
+        assertEquals("", CopilotJsonParser.parseAgentContents(raw))
     }
 
     @Test
@@ -208,5 +208,64 @@ class CopilotJsonParserTest {
         val middle = mapper.writeValueAsString(mapOf("type" to "UnknownType", "data" to "something"))
         val json = valueOuter("uuid-1", middle)
         assertTrue(CopilotJsonParser.parseAgentContents(json).isNotEmpty())
+    }
+
+    // -------------------------------------------------------------------------
+    // Variante D: Filter / Error (Content-Filter bzw. Server-Fehler)
+    // -------------------------------------------------------------------------
+
+    /** Baut Ebene 2 für Filter/Error: { "type": "<type>", "data": "{\"message\":\"...\"}" } */
+    private fun messageMiddle(type: String, message: String): String =
+        mapper.writeValueAsString(mapOf("type" to type, "data" to mapper.writeValueAsString(mapOf("message" to message))))
+
+    @Test
+    fun `Filter type returns filter message instead of raw json`() {
+        val json = valueOuter("uuid-1", messageMiddle("Filter", "Oops, your response got filtered."))
+        assertEquals("Oops, your response got filtered.", CopilotJsonParser.parseAgentContents(json))
+    }
+
+    @Test
+    fun `Error type returns error message instead of raw json`() {
+        val json = valueOuter("uuid-1", messageMiddle("Error", "Oops, no choices received from the server. Please try again."))
+        assertEquals("Oops, no choices received from the server. Please try again.", CopilotJsonParser.parseAgentContents(json))
+    }
+
+    @Test
+    fun `real reply takes priority over a Filter message`() {
+        val entries = mapOf(
+            "uuid-1" to mapOf("type" to "Value", "value" to messageMiddle("Filter", "Oops, your response got filtered.")),
+            "uuid-2" to mapOf("type" to "Value", "value" to agentRoundMiddle(1, "real reply")),
+        )
+        val json = mapper.writeValueAsString(entries)
+        assertEquals("real reply", CopilotJsonParser.parseAgentContents(json))
+    }
+
+    // -------------------------------------------------------------------------
+    // Tool-only Agent-Runden (alle reply leer) → kein Roh-JSON
+    // -------------------------------------------------------------------------
+
+    @Test
+    fun `AgentRound with only empty replies returns empty string not raw json`() {
+        // Reproduziert reale Turns, in denen die Antwort ausschließlich aus
+        // Tool-Calls besteht (reply=="" in allen Runden). Erwartung: leerer
+        // String, damit KEIN Roh-JSON in der UI landet.
+        val entries = mapOf(
+            "uuid-1" to mapOf("type" to "Value", "value" to agentRoundMiddle(1, "")),
+            "uuid-2" to mapOf("type" to "Value", "value" to agentRoundMiddle(2, "")),
+        )
+        val json = mapper.writeValueAsString(entries)
+        assertEquals("", CopilotJsonParser.parseAgentContents(json))
+    }
+
+    @Test
+    fun `recognized subgraph with only empty replies returns empty string`() {
+        val innerValue = mapper.writeValueAsString(
+            mapOf(
+                "a" to mapOf("type" to "Value", "value" to agentRoundMiddle(1, "")),
+                "b" to mapOf("type" to "Value", "value" to markdownMiddle("   ")),
+            ),
+        )
+        val json = subgraphOuter("__first__", innerValue)
+        assertEquals("", CopilotJsonParser.parseAgentContents(json))
     }
 }

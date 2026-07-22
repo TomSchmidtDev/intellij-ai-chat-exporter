@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.7.6"
+version = "1.8.0"
 
 kotlin {
     jvmToolchain(21)
@@ -30,6 +30,11 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.8.0</b>
+            <ul>
+                <li>New: Copilot sessions started from the IDE that run as CLI/background agents (their conversation is stored outside the Nitrite DB) now show their real prompts and answers, read from the Copilot CLI event log — previously they appeared with only the prompt and a "no local turns found" placeholder</li>
+                <li>Fixed: some Copilot agent/edit answers were exported as raw JSON (content-filter, error, and tool-only turns) — these are now rendered as clean text or omitted when empty</li>
+            </ul>
             <b>1.7.6</b>
             <ul>
                 <li>Renamed the plugin to "AI Chat Exporter for Copilot &amp; Claude" on the Marketplace, now that Claude Code is also supported — the Settings page is labeled simply "AI Chat Exporter"</li>
@@ -263,3 +268,4 @@ dependencies {
         }
     }
 }
+

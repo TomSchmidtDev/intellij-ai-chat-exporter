@@ -126,26 +126,35 @@ class CopilotChatReaderService(private val project: Project) {
                 openNitrite(tempFile) { db ->
                     val store = db.store
                     val sessionMap = store.openMap<NitriteId, Document>(config.sessionCollection, NitriteId::class.java, Document::class.java)
-                    val turnMap = store.openMap<NitriteId, Document>(config.turnCollection, NitriteId::class.java, Document::class.java)
+                    val turnMaps = resolveTurnMaps(db, config)
 
                     val allSessions = sessionMap.values().toList()
-                    val allTurns = turnMap.values().toList()
+                    val allTurns = turnMaps.asSequence().flatMap { it.values().asSequence() }.toList()
                     report.appendLine("  Sessions: ${allSessions.size}, Turns: ${allTurns.size}")
-
                     // Group turns by sessionId for efficient per-session display
                     val turnsBySession: Map<String, List<Document>> = allTurns
-                        .groupBy { doc -> doc.get("sessionId") as? String ?: "" }
+                        .groupBy { doc ->
+                            NitriteDocCompat.firstNonBlank(
+                                doc,
+                                "sessionId",
+                                "session.id",
+                                "chatSessionId",
+                                "agentSessionId",
+                                "conversationId",
+                                "conversation.id",
+                            ) ?: ""
+                        }
 
                     allSessions
                         .sortedBy { (it.get("createdAt") as? Number)?.toLong() ?: 0L }
                         .forEach { doc: Document ->
-                            val id = doc.get("id") as? String ?: "(no id)"
-                            val title = doc.get("name.value") as? String ?: "(no title)"
+                            val id = NitriteDocCompat.getString(doc, "id") ?: "(no id)"
+                            val title = NitriteDocCompat.firstNonBlank(doc, "name.value", "name", "title") ?: "(no title)"
                             report.appendLine("  Session: $title [$id]")
-                            report.appendLine("    Created: ${formatTimestamp(doc.get("createdAt"))}")
+                            report.appendLine("    Created: ${formatTimestamp(NitriteDocCompat.getValue(doc, "createdAt"))}")
 
                             val joinedTurns = turnsBySession[id] ?: emptyList()
-                            val embeddedTurns = (doc.get("turns") as? List<*>)?.filterIsInstance<Document>() ?: emptyList()
+                            val embeddedTurns = extractEmbeddedTurns(doc)
                             val usedEmbeddedFallback = joinedTurns.isEmpty() && embeddedTurns.isNotEmpty()
                             val sessionTurns = (joinedTurns.ifEmpty { embeddedTurns })
                                 .sortedBy { (it.get("createdAt") as? Number)?.toLong() ?: 0L }
@@ -153,7 +162,7 @@ class CopilotChatReaderService(private val project: Project) {
                             val deletedCount = sessionTurns.size - activeTurns.size
 
                             if (sessionTurns.isEmpty()) {
-                                report.appendLine("    Turns: 0  → FILTERED (no turns, will not appear in plugin)")
+                                report.appendLine("    Turns: 0  → metadata-only fallback session will be shown in plugin")
                             } else {
                                 if (usedEmbeddedFallback) {
                                     report.appendLine("    (no turns in separate collection — using turns embedded in session document)")
@@ -161,10 +170,11 @@ class CopilotChatReaderService(private val project: Project) {
                                 val deletedNote = if (deletedCount > 0) ", $deletedCount deleted" else ""
                                 report.appendLine("    Turns: ${sessionTurns.size} total, ${activeTurns.size} active$deletedNote")
                                 activeTurns.forEach { turn ->
-                                    report.appendLine("    Turn [${formatTimestamp(turn.get("createdAt"))}]:")
-                                    val userText = (turn.get("request.stringContent") as? String)?.takeIf { it.isNotBlank() }
-                                    val reqContents = (turn.get("request.contents") as? String)?.takeIf { it.isNotBlank() }
-                                    val hasResponse = turn.get("response.stringContent") != null || turn.get("response.contents") != null
+                                    report.appendLine("    Turn [${formatTimestamp(NitriteDocCompat.getValue(turn, "createdAt"))}]:")
+                                    val userText = NitriteDocCompat.firstNonBlank(turn, "request.stringContent", "request.text")
+                                    val reqContents = NitriteDocCompat.getString(turn, "request.contents")?.takeIf { it.isNotBlank() }
+                                    val hasResponse = NitriteDocCompat.getValue(turn, "response.stringContent") != null ||
+                                        NitriteDocCompat.getValue(turn, "response.contents") != null
                                     when {
                                         userText != null -> report.appendLine("      USER: ${userText.take(120)}")
                                         reqContents != null -> report.appendLine("      USER (contents): ${reqContents.take(80)}")
@@ -245,12 +255,12 @@ class CopilotChatReaderService(private val project: Project) {
     private fun readSessionsFromDb(db: Nitrite, config: SessionTypeConfig): List<ChatSession> {
         val store = db.store
         val sessionMap = store.openMap<NitriteId, Document>(config.sessionCollection, NitriteId::class.java, Document::class.java)
-        val turnMap = store.openMap<NitriteId, Document>(config.turnCollection, NitriteId::class.java, Document::class.java)
+        val turnMaps = resolveTurnMaps(db, config)
 
         if (sessionMap.size() == 0L) return emptyList()
 
         return sessionMap.values().toList().mapNotNull { sessionDoc: Document ->
-            buildChatSession(sessionDoc, turnMap)
+            buildChatSession(sessionDoc, turnMaps)
         }
     }
 
@@ -286,26 +296,24 @@ class CopilotChatReaderService(private val project: Project) {
      */
     private fun buildChatSession(
         sessionDoc: Document,
-        turnMap: NitriteMap<NitriteId, Document>,
+        turnMaps: List<NitriteMap<NitriteId, Document>>,
     ): ChatSession? {
-        val id = sessionDoc.get("id") as? String ?: return null
-        val title = (sessionDoc.get("name.value") as? String)?.take(80) ?: id
-        val createdAt = (sessionDoc.get("createdAt") as? Number)?.toLong() ?: 0L
+        val id = NitriteDocCompat.getString(sessionDoc, "id") ?: return null
+        val title = (NitriteDocCompat.firstNonBlank(sessionDoc, "name.value", "name", "title") ?: id).take(80)
+        val createdAt = NitriteDocCompat.getLong(sessionDoc, "createdAt") ?: 0L
 
         // LERNHINWEIS: Nitrite 4.x hat keine serverseitige Filterabfrage über openMap().
         // Wir filtern die Turns lazy per Sequence, sodass nicht-passende Dokumente
         // nicht im Heap gehalten werden. sortedBy materialisiert nur die gefilterten Turns.
-        val joinedTurns = turnMap.values().asSequence()
-            .filter { turn: Document -> turn.get("sessionId") == id && !isTurnDeleted(turn) }
+        val joinedTurns = turnMaps.asSequence()
+            .flatMap { turnMap -> turnMap.values().asSequence() }
+            .filter { turn: Document -> NitriteDocCompat.matchesSessionId(turn, id) && !isTurnDeleted(turn) }
             .toList()
 
         // Fallback-Ebene 1: eingebettete Turns im Session-Dokument selbst, falls
         // die separate Turn-Collection (noch) nichts Passendes enthält.
         val turns = (joinedTurns.ifEmpty {
-            (sessionDoc.get("turns") as? List<*>)
-                ?.filterIsInstance<Document>()
-                ?.filterNot { isTurnDeleted(it) }
-                ?: emptyList()
+            extractEmbeddedTurns(sessionDoc).filterNot { isTurnDeleted(it) }
         }).sortedBy { turn: Document -> (turn.get("createdAt") as? Number)?.toLong() ?: 0L }
 
         val messages = mutableListOf<ChatMessage>()
@@ -315,7 +323,7 @@ class CopilotChatReaderService(private val project: Project) {
 
         turns.forEach { turn ->
             turnCount++
-            val turnTs = (turn.get("createdAt") as? Number)?.toLong() ?: 0L
+            val turnTs = NitriteDocCompat.getLong(turn, "createdAt") ?: 0L
             if (turnTs > lastModifiedAt) lastModifiedAt = turnTs
 
             val userText = extractUserText(turn)
@@ -336,30 +344,149 @@ class CopilotChatReaderService(private val project: Project) {
             }
         }
 
-        if (messages.isEmpty()) return null
+        if (messages.isEmpty()) {
+            // Fallback-Ebene 3: Aus der IDE gestartete Copilot-**CLI**-/Background-Sessions
+            // legen im Nitrite-Store nur einen Metadaten-Stub ab; der eigentliche
+            // Gesprächsverlauf liegt im Event-Log der CLI unter
+            // ~/.copilot/session-state/<id>/events.jsonl. Diesen erschließen wir hier,
+            // bevor wir auf den reinen Metadaten-Platzhalter zurückfallen.
+            val conversationId = NitriteDocCompat.getString(sessionDoc, "conversationId")
+            loadCliSession(id, title, createdAt, conversationId)?.let { return it }
+        }
+
+        if (messages.isEmpty()) {
+            val modifiedAt = NitriteDocCompat.getLong(sessionDoc, "modifiedAt") ?: createdAt
+            val metadataContext = CopilotSessionFallback.MetadataContext(
+                targetType = NitriteDocCompat.getString(sessionDoc, "targetType"),
+                modeId = NitriteDocCompat.getString(sessionDoc, "modeId"),
+                conversationId = NitriteDocCompat.getString(sessionDoc, "conversationId"),
+            )
+            return CopilotSessionFallback.metadataOnlyOrNull(
+                id = id,
+                title = title,
+                createdAt = createdAt,
+                modifiedAt = modifiedAt,
+                metadataContext = metadataContext,
+            )
+        }
 
         return ChatSession(id = id, title = title, createdAt = createdAt, messages = messages, lastModifiedAt = lastModifiedAt)
     }
 
+    /**
+     * Fallback-Ebene 3: Erschließt den Gesprächsverlauf einer aus der IDE
+     * gestarteten Copilot-CLI-/Background-Session aus deren Event-Log
+     * (`~/.copilot/session-state/<id>/events.jsonl`). Solche Sessions haben im
+     * Nitrite-Store nur einen leeren Metadaten-Stub. Die Datei-Auffindung bleibt
+     * hier (dünn); das Parsen übernimmt der unit-getestete
+     * [CopilotCliSessionParser].
+     */
+    private fun loadCliSession(
+        id: String,
+        title: String,
+        createdAt: Long,
+        conversationId: String?,
+    ): ChatSession? {
+        val home = System.getProperty("user.home") ?: return null
+        val candidateIds = listOf(id, conversationId).filterNotNull().filter { it.isNotBlank() }.distinct()
+
+        for (candidate in candidateIds) {
+            val eventsFile = File(home, ".copilot/session-state/$candidate/events.jsonl")
+            if (!eventsFile.isFile) continue
+
+            val jsonl = runCatching { eventsFile.readText() }.getOrNull() ?: continue
+            val messages = CopilotCliSessionParser.parse(jsonl)
+            if (messages.isEmpty()) continue
+
+            val lastModifiedAt = messages.maxOf { it.timestamp }.takeIf { it > 0L } ?: createdAt
+            log.debug("Session '$title' [$id]: loaded ${messages.size} messages from CLI event log ($candidate)")
+            return ChatSession(
+                id = id,
+                title = title,
+                createdAt = createdAt,
+                messages = messages,
+                lastModifiedAt = lastModifiedAt,
+            )
+        }
+        return null
+    }
+
     private fun isTurnDeleted(turn: Document): Boolean {
-        val deletedAt = (turn.get("deletedAt") as? Number)?.toLong() ?: return false
+        val deletedAt = NitriteDocCompat.getLong(turn, "deletedAt") ?: return false
         return deletedAt > 0L
     }
 
     private fun extractUserText(turn: Document): String? {
         // Direkter Text-Inhalt (Chat-Modus)
-        (turn.get("request.stringContent") as? String)?.takeIf { it.isNotBlank() }?.let { return it }
+        NitriteDocCompat.firstNonBlank(turn, "request.stringContent", "request.text")
+            ?.takeIf { it.isNotBlank() }
+            ?.let { return it }
         // Agent/Edit-Modus: komplexes JSON
-        (turn.get("request.contents") as? String)?.takeIf { it.isNotBlank() }?.let { return CopilotJsonParser.parseAgentContents(it) }
+        NitriteDocCompat.getString(turn, "request.contents")
+            ?.takeIf { it.isNotBlank() }
+            ?.let { return CopilotJsonParser.parseAgentContents(it) }
         return null
     }
 
     private fun extractAssistantText(turn: Document): String? {
         // Direkter Text-Inhalt (Chat-Modus)
-        (turn.get("response.stringContent") as? String)?.takeIf { it.isNotBlank() }?.let { return it }
+        NitriteDocCompat.firstNonBlank(turn, "response.stringContent", "response.text")
+            ?.takeIf { it.isNotBlank() }
+            ?.let { return it }
         // Agent/Edit-Modus: komplexes JSON
-        (turn.get("response.contents") as? String)?.takeIf { it.isNotBlank() }?.let { return CopilotJsonParser.parseAgentContents(it) }
+        NitriteDocCompat.getString(turn, "response.contents")
+            ?.takeIf { it.isNotBlank() }
+            ?.let { return CopilotJsonParser.parseAgentContents(it) }
         return null
+    }
+
+    private fun extractEmbeddedTurns(sessionDoc: Document): List<Document> {
+        val explicit = listOf("turns", "messages", "entries")
+            .flatMap { key -> NitriteDocCompat.asDocumentList(NitriteDocCompat.getValue(sessionDoc, key)) }
+        if (explicit.isNotEmpty()) return explicit
+
+        return sessionDoc.getFields()
+            .asSequence()
+            .flatMap { fieldName -> NitriteDocCompat.asDocumentList(sessionDoc.get(fieldName)).asSequence() }
+            .filter { turn ->
+                NitriteDocCompat.getValue(turn, "request") != null ||
+                    NitriteDocCompat.getValue(turn, "response") != null ||
+                    NitriteDocCompat.getValue(turn, "request.stringContent") != null ||
+                    NitriteDocCompat.getValue(turn, "response.stringContent") != null
+            }
+            .toList()
+    }
+
+    private fun resolveTurnMaps(db: Nitrite, config: SessionTypeConfig): List<NitriteMap<NitriteId, Document>> {
+        val store = db.store
+        val preferred = store.openMap<NitriteId, Document>(config.turnCollection, NitriteId::class.java, Document::class.java)
+        val fallbackNames = getStoreMapNames(store)
+            .asSequence()
+            .filterNot { it.startsWith("\$nitrite_") }
+            .filter { it != config.turnCollection }
+            .filter { it.contains("Turn", ignoreCase = true) }
+            .toList()
+
+        val fallbacks: List<NitriteMap<NitriteId, Document>> = fallbackNames.mapNotNull { name ->
+            runCatching { store.openMap<NitriteId, Document>(name, NitriteId::class.java, Document::class.java) }.getOrNull()
+        }
+
+        return buildList {
+            add(preferred)
+            fallbacks.forEach { fallback ->
+                if (fallback.size() > 0L) add(fallback)
+            }
+        }
+    }
+
+    private fun getStoreMapNames(store: Any): List<String> {
+        val catalogMethod = store::class.java.methods.firstOrNull { it.name == "getCatalog" && it.parameterCount == 0 }
+            ?: return emptyList()
+        val catalog = runCatching { catalogMethod.invoke(store) }.getOrNull() ?: return emptyList()
+        val reposMethod = catalog::class.java.methods.firstOrNull { it.name == "getRepositoryNames" && it.parameterCount == 0 }
+            ?: return emptyList()
+        val repos = runCatching { reposMethod.invoke(catalog) }.getOrNull() ?: return emptyList()
+        return (repos as? Iterable<*>)?.mapNotNull { it?.toString() } ?: emptyList()
     }
 
     private fun formatTimestamp(value: Any?): String {
