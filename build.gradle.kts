@@ -32,7 +32,7 @@ intellijPlatform {
         changeNotes = """
             <b>1.9.0</b>
             <ul>
-                <li>New: added a "Copilot CLI" tab for standalone/background Copilot CLI agent sessions (~/.copilot/session-state/), which GitHub Copilot for JetBrains now runs on by default — these sessions run outside the IDE panel and were previously not shown in the exporter at all</li>
+                <li>New: added a "Copilot CLI" tab for standalone/background Copilot CLI agent sessions (~/.copilot/session-state/), which GitHub Copilot for JetBrains now runs on by default — these sessions run outside the IDE panel and were previously not shown in the exporter at all; a "Tool Calls" button bulk-selects the messages containing tool calls before export</li>
             </ul>
             <b>1.8.0</b>
             <ul>

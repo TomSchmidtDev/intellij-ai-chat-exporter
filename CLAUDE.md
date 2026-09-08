@@ -15,21 +15,27 @@ An IntelliJ Platform plugin that exports **GitHub Copilot** and **Claude Code** 
 
 ## Architecture
 
-The tool window uses a `JTabbedPane` with two independent tabs:
+The tool window uses a `JTabbedPane` with three independent tabs:
 
 ```
-ui/                     ExporterToolWindowFactory — JTabbedPane with two tabs
+ui/                     ExporterToolWindowFactory — JTabbedPane with three tabs
                         ExporterPanel             — Copilot tab
+                        CopilotCliPanel           — Copilot CLI tab
                         ClaudeCodePanel           — Claude Code tab
 
 services/               CopilotChatReaderService  — reads Nitrite DB (PROJECT service)
                         CopilotJsonParser         — parses agent/edit JSON in Copilot turns
+                        CopilotCliSessionReaderService — discovers ~/.copilot/session-state/ (APP service)
+                        CopilotCliSessionParser   — parses events.jsonl; also backs the Nitrite-stub fallback in CopilotChatReaderService
+                        CopilotCliWorkspaceYamlParser — parses workspace.yaml key:value metadata
                         ClaudeCodeReaderService   — discovers ~/.claude/projects/ (APP service)
                         ClaudeJsonParser          — parses .jsonl session files
 
 model/                  ChatSession, ChatMessage, Role   — shared; used by both exporters
                         ClaudeCodeMessage                — typed content blocks (text/thinking/tool_use)
                         ClaudeCodeSession                — wraps ClaudeCodeMessage list; converts to ChatSession for export
+                        CopilotCliMessage                — typed text/tool-call blocks for a Copilot CLI turn
+                        CopilotCliSession                — wraps CopilotCliMessage list; converts to ChatSession for export
 
 export/                 HtmlExporter, MarkdownExporter   — shared; accept List<ChatSession>
 
@@ -78,6 +84,13 @@ Three session types, each with their own DB file:
 - `chat-sessions` → `copilot-chat-nitrite.db`
 - `chat-agent-sessions` → `copilot-agent-sessions-nitrite.db`
 - `chat-edit-sessions` → `copilot-edit-sessions-nitrite.db`
+
+### Copilot CLI session-state location
+| OS | Path |
+|---|---|
+| macOS / Linux / Windows | `~/.copilot/session-state/<uuid>/` |
+
+Each session directory holds `workspace.yaml` (flat `key: value` metadata — cwd, repository, branch, timestamps) and `events.jsonl` (a JSONL event log). Relevant event types: `user.message` (the prompt), `assistant.message` (the reply text, plus a `toolRequests[]` array of `{toolCallId, name, arguments}`), and `tool.execution_complete` (a tool's result, correlated back to its request by `toolCallId`). This is a completely separate storage format from the Copilot Nitrite DB above — no Nitrite, no schema classes, and no temp-copy step is needed since nothing locks these files.
 
 ### Nitrite 4.x quirks (important!)
 - Copilot registers collections as **Repositories**, so `db.listCollectionNames()` always returns 0.
@@ -168,12 +181,12 @@ plugin ZIP and from `screenshots/` in this repo:
 - Tool window icon (13×13): `src/main/resources/icons/pluginIcon.svg` — speech-bubble style
 - Marketplace / IDE plugin list icon (40×40): `src/main/resources/META-INF/pluginIcon.svg` — document + brain badge
 
-## UI conventions (ExporterPanel / ClaudeCodePanel)
+## UI conventions (ExporterPanel / CopilotCliPanel / ClaudeCodePanel)
 - All UI is built with standard Swing + JetBrains `com.intellij.ui.*` components.
 - Long-running work (DB reads, exports) runs via `Task.Backgroundable`; never block the EDT.
 - `CheckBoxList<T>` — use `addItem(item, text, selected)` to populate; HTML strings are supported as display text.
 - **Avoid calling `setItemSelected` in a loop** — it does an O(n) model scan per call (→ O(n²) total). Instead, read all checked states into a `BooleanArray`, modify it, then rebuild the list with `clear()` + `addItem` in one pass.
-- `ClaudeCodePanel` uses `JToggleButton` fields (stored as class members) for the four visibility toggles so their state can be read at export time without listeners holding stale values.
+- `ClaudeCodePanel`'s Prompts / Assistant / Tool Calls / Thinking controls are plain `JButton`s, not per-block runtime toggles: each one bulk-checks or -unchecks the messages matching that type in the `CheckBoxList` (`toggleTypeSelection { ... }`). Filtering happens entirely through which messages end up checked; `showThinking`/`showToolCalls` are hardcoded `true` in `toChatSession()` at export time. `CopilotCliPanel` follows the identical pattern with a single "Tool Calls" button — no per-block visibility flag there either.
 
 ## Repository
 https://github.com/TomSchmidtDev/intellij-ai-chat-exporter

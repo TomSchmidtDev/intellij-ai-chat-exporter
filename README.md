@@ -26,7 +26,7 @@ An IntelliJ plugin that lets you export your **GitHub Copilot** and **Claude Cod
 
 ### Copilot CLI
 - **Browse standalone Copilot CLI sessions** from `~/.copilot/session-state/` — background/agent sessions that GitHub Copilot for JetBrains now runs on the Copilot CLI harness by default (sessions started from a terminal `copilot` session or launched in the background from the IDE)
-- **Toggle tool calls** on or off before export, same as the other tabs
+- **Bulk-select messages with tool calls** using the Tool Calls button before export, same as the other tabs
 
 ### Export
 - **Export to Markdown** (`.md`) — clean, portable, paste-ready
@@ -73,7 +73,7 @@ Or install manually via **Settings → Plugins → Install Plugin from Disk** us
 ### Copilot CLI tab
 1. Select the **Copilot CLI** tab in the tool window
 2. Pick one or more sessions from the list
-3. Toggle **Tool Calls** to include or exclude tool-call details
+3. Click **Tool Calls** to bulk-select (or deselect) all messages containing tool calls
 4. Click **Export MD** or **Export HTML**
 
 ## Requirements

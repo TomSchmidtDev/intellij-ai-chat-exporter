@@ -3,7 +3,7 @@
 ## [1.9.0] - 2026-09-08
 
 ### Added
-- New "Copilot CLI" tab: browse and export standalone/background Copilot CLI agent sessions from `~/.copilot/session-state/<id>/`. GitHub Copilot for JetBrains moved to the Copilot CLI harness as its default backend in 2026 (GA since 2026-08-24); sessions run independently in the background and were previously invisible to this exporter. Each session shows its working directory/repository, branch, and message count; tool calls (with their arguments and results) can be toggled on or off before export.
+- New "Copilot CLI" tab: browse and export standalone/background Copilot CLI agent sessions from `~/.copilot/session-state/<id>/`. GitHub Copilot for JetBrains moved to the Copilot CLI harness as its default backend in 2026 (GA since 2026-08-24); sessions run independently in the background and were previously invisible to this exporter. Each session shows its working directory/repository, branch, and message count; a "Tool Calls" button bulk-selects or -deselects the messages containing tool calls before export.
 
 ## [1.8.0] - 2026-07-21
 
