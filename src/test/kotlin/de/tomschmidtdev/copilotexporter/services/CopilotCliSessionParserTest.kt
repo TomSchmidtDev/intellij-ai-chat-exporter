@@ -12,6 +12,7 @@ class CopilotCliSessionParserTest {
             null -> "null"
             is String -> "\"" + v.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n") + "\""
             is Map<*, *> -> v.entries.joinToString(",", "{", "}") { "\"${it.key}\":${render(it.value)}" }
+            is List<*> -> v.joinToString(",", "[", "]") { render(it) }
             else -> v.toString()
         }
         return pairs.joinToString(",", "{", "}") { "\"${it.first}\":${render(it.second)}" }
@@ -119,5 +120,85 @@ class CopilotCliSessionParserTest {
 
         assertEquals(1, messages.size)
         assertEquals("Trotzdem gelesen", messages[0].content)
+    }
+
+    // ── parseMessages() — tool-call extraction (new in this task) ──────────────
+
+    @Test
+    fun `parseMessages extracts tool call blocks from toolRequests`() {
+        val jsonl = listOf(
+            line(
+                "type" to "assistant.message",
+                "data" to mapOf(
+                    "content" to "Let me check",
+                    "toolRequests" to listOf(
+                        mapOf("toolCallId" to "toolu_1", "name" to "bash", "arguments" to mapOf("command" to "ls")),
+                    ),
+                ),
+            ),
+        ).joinToString("\n")
+
+        val messages = CopilotCliSessionParser.parseMessages(jsonl)
+
+        assertEquals(1, messages.size)
+        assertEquals(listOf("Let me check"), messages[0].textBlocks)
+        assertEquals(1, messages[0].toolCallBlocks.size)
+        assertTrue(messages[0].toolCallBlocks[0].startsWith("[Tool: bash]\n"))
+        assertTrue(messages[0].toolCallBlocks[0].contains("\"command\":\"ls\""))
+    }
+
+    @Test
+    fun `parseMessages correlates tool_execution_complete result by toolCallId`() {
+        val jsonl = listOf(
+            line(
+                "type" to "assistant.message",
+                "data" to mapOf(
+                    "content" to "Checking files",
+                    "toolRequests" to listOf(
+                        mapOf("toolCallId" to "toolu_1", "name" to "bash", "arguments" to mapOf("command" to "ls")),
+                    ),
+                ),
+            ),
+            line(
+                "type" to "tool.execution_complete",
+                "data" to mapOf("toolCallId" to "toolu_1", "success" to true, "result" to mapOf("content" to "file1\nfile2")),
+            ),
+        ).joinToString("\n")
+
+        val messages = CopilotCliSessionParser.parseMessages(jsonl)
+
+        assertEquals(1, messages.size)
+        val block = messages[0].toolCallBlocks[0]
+        assertTrue(block.contains("[Result]\nfile1\nfile2"))
+    }
+
+    @Test
+    fun `parseMessages never reads transformedContent`() {
+        val jsonl = line(
+            "type" to "user.message",
+            "data" to mapOf("content" to "echte Frage", "transformedContent" to "<current_datetime>...</current_datetime>\necht anders"),
+        )
+
+        val messages = CopilotCliSessionParser.parseMessages(jsonl)
+
+        assertEquals(1, messages.size)
+        assertEquals(listOf("echte Frage"), messages[0].textBlocks)
+    }
+
+    @Test
+    fun `parseMessages keeps assistant message with only tool calls and no text`() {
+        val jsonl = line(
+            "type" to "assistant.message",
+            "data" to mapOf(
+                "content" to "",
+                "toolRequests" to listOf(mapOf("toolCallId" to "toolu_1", "name" to "bash", "arguments" to mapOf("command" to "ls"))),
+            ),
+        )
+
+        val messages = CopilotCliSessionParser.parseMessages(jsonl)
+
+        assertEquals(1, messages.size)
+        assertEquals(emptyList<String>(), messages[0].textBlocks)
+        assertEquals(1, messages[0].toolCallBlocks.size)
     }
 }
