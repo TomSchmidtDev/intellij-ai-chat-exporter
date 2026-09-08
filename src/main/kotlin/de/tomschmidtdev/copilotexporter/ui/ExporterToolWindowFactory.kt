@@ -33,6 +33,7 @@ class ExporterToolWindowFactory : ToolWindowFactory {
 
         val tabbedPane = javax.swing.JTabbedPane().apply {
             addTab("Copilot", ExporterPanel(project))
+            addTab("Copilot CLI", CopilotCliPanel(project))
             addTab("Claude Code", ClaudeCodePanel(project))
 
             val settings = de.tomschmidtdev.copilotexporter.settings.ExporterSettings.getInstance()
