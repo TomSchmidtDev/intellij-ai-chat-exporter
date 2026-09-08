@@ -24,6 +24,10 @@ Ein IntelliJ-Plugin, mit dem du deine **GitHub Copilot**- und **Claude Code**-Ch
 - **Nach Projekt filtern** — Sitzungsliste auf ein bestimmtes Projektverzeichnis einschränken
 - **Tool Calls und Thinking-Blöcke** ein-/ausblenden (standardmäßig ausgeblendet)
 
+### Copilot CLI
+- **Eigenständige Copilot-CLI-Sitzungen durchsuchen** aus `~/.copilot/session-state/` — Hintergrund-/Agent-Sitzungen, die GitHub Copilot für JetBrains jetzt standardmäßig über den Copilot-CLI-Harness ausführt (Sitzungen, die über eine `copilot`-Terminalsitzung gestartet oder im Hintergrund aus der IDE heraus ausgeführt werden)
+- **Tool Calls** vor dem Export ein- oder ausblenden, wie bei den anderen Tabs
+
 ### Export
 - **Export als Markdown** (`.md`) — sauber, portabel, direkt einfügbar
 - **Export als HTML** (`.html`) — vollständig gestylt mit Syntax-Highlighting für Codeblöcke, öffnet sich nach dem Export direkt in der IDE
@@ -66,11 +70,18 @@ Oder installiere es manuell über **Einstellungen → Plugins → Plugin von Dat
 4. Mit den Schaltern **Tool Calls** und **Thinking** diese Block-Typen ein- oder ausblenden
 5. Klicke auf **Export MD** oder **Export HTML**
 
+### Copilot-CLI-Tab
+1. Wähle den Tab **Copilot CLI** im Tool-Fenster
+2. Wähle eine oder mehrere Sitzungen aus der Liste
+3. Mit dem Schalter **Tool Calls** Tool-Aufruf-Details ein- oder ausblenden
+4. Klicke auf **Export MD** oder **Export HTML**
+
 ## Voraussetzungen
 
 - JetBrains-IDE 2025.1 oder neuer
 - Für Copilot-Export: GitHub Copilot-Plugin installiert und mindestens eine Chat-Sitzung aufgezeichnet
 - Für Claude Code-Export: Claude Code installiert und mindestens eine Sitzung in `~/.claude/projects/` vorhanden
+- Für Copilot-CLI-Export: mindestens eine Sitzung in `~/.copilot/session-state/` vorhanden
 
 ## Datenschutz
 

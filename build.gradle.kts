@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.8.0"
+version = "1.9.0"
 
 kotlin {
     jvmToolchain(21)
@@ -30,6 +30,10 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.9.0</b>
+            <ul>
+                <li>New: added a "Copilot CLI" tab for standalone/background Copilot CLI agent sessions (~/.copilot/session-state/), which GitHub Copilot for JetBrains now runs on by default — these sessions run outside the IDE panel and were previously not shown in the exporter at all</li>
+            </ul>
             <b>1.8.0</b>
             <ul>
                 <li>New: Copilot sessions started from the IDE that run as CLI/background agents (their conversation is stored outside the Nitrite DB) now show their real prompts and answers, read from the Copilot CLI event log — previously they appeared with only the prompt and a "no local turns found" placeholder</li>

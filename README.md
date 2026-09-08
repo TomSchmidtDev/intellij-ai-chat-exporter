@@ -24,6 +24,10 @@ An IntelliJ plugin that lets you export your **GitHub Copilot** and **Claude Cod
 - **Filter by project** — narrow the session list to a specific project directory
 - **Toggle Tool Calls and Thinking blocks** on/off (hidden by default)
 
+### Copilot CLI
+- **Browse standalone Copilot CLI sessions** from `~/.copilot/session-state/` — background/agent sessions that GitHub Copilot for JetBrains now runs on the Copilot CLI harness by default (sessions started from a terminal `copilot` session or launched in the background from the IDE)
+- **Toggle tool calls** on or off before export, same as the other tabs
+
 ### Export
 - **Export to Markdown** (`.md`) — clean, portable, paste-ready
 - **Export to HTML** (`.html`) — fully styled with syntax-highlighted code blocks, opens directly in the IDE after export
@@ -66,11 +70,18 @@ Or install manually via **Settings → Plugins → Install Plugin from Disk** us
 4. Use the **Tool Calls** and **Thinking** toggles to include or exclude those block types
 5. Click **Export MD** or **Export HTML**
 
+### Copilot CLI tab
+1. Select the **Copilot CLI** tab in the tool window
+2. Pick one or more sessions from the list
+3. Toggle **Tool Calls** to include or exclude tool-call details
+4. Click **Export MD** or **Export HTML**
+
 ## Requirements
 
 - JetBrains IDE 2025.1 or later
 - For Copilot export: GitHub Copilot plugin installed with at least one chat session recorded
 - For Claude Code export: Claude Code installed with at least one session in `~/.claude/projects/`
+- For Copilot CLI export: at least one session in `~/.copilot/session-state/`
 
 ## Privacy
 
