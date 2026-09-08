@@ -35,6 +35,10 @@ An IntelliJ plugin that lets you export your **GitHub Copilot** and **Claude Cod
 - **Custom color profile** — configure all HTML colors individually via the settings page
 - **Read-only access** — no chat data is ever modified
 
+## A Note on Format Stability
+
+This plugin reads the local, undocumented session storage that GitHub Copilot and Claude Code use internally — not a public, stable API. Both tools' vendors can change these formats without notice, and Copilot in particular already has: it has moved between different internal database schemas, and most recently switched its default backend to an entirely new on-disk format (the Copilot CLI harness). When a format changes, this plugin's reading logic can fall behind — sessions may show up incomplete, with a placeholder, or not at all until the plugin is updated to match. If a session looks wrong or is missing after updating Copilot or Claude Code, please [open an issue](https://github.com/TomSchmidtDev/intellij-ai-chat-exporter/issues) mentioning your plugin/tool version so support can be added.
+
 ## Settings
 
 ![Plugin Settings](screenshots/plugin-settings.png)

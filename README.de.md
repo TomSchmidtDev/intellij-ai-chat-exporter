@@ -35,6 +35,10 @@ Ein IntelliJ-Plugin, mit dem du deine **GitHub Copilot**- und **Claude Code**-Ch
 - **Eigenes Farbprofil** — alle HTML-Farben individuell über die Einstellungsseite konfigurierbar
 - **Nur-Lesen-Zugriff** — keine Chatdaten werden jemals verändert
 
+## Hinweis zur Formatstabilität
+
+Dieses Plugin liest die lokalen, nicht öffentlich dokumentierten Speicherformate, die GitHub Copilot und Claude Code intern verwenden — keine stabile, offizielle API. Die Hersteller beider Tools können diese Formate jederzeit ohne Ankündigung ändern, und bei Copilot ist das bereits mehrfach passiert: unterschiedliche interne Datenbankschemata, zuletzt der komplette Wechsel des Standard-Backends auf ein völlig neues Speicherformat (den Copilot-CLI-Harness). Ändert sich ein Format, kann die Leselogik dieses Plugins dahinter zurückbleiben — Sitzungen erscheinen dann möglicherweise unvollständig, nur als Platzhalter oder gar nicht, bis das Plugin an das neue Format angepasst wurde. Falls nach einem Update von Copilot oder Claude Code Sitzungen fehlen oder falsch aussehen, bitte mit der jeweiligen Plugin-/Tool-Version ein [Issue eröffnen](https://github.com/TomSchmidtDev/intellij-ai-chat-exporter/issues), damit die Unterstützung nachgezogen werden kann.
+
 ## Einstellungen
 
 ![Plugin Settings](screenshots/plugin-settings.png)
