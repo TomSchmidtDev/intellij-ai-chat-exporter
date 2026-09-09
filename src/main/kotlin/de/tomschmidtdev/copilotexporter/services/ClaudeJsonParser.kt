@@ -6,6 +6,7 @@ import de.tomschmidtdev.copilotexporter.model.ClaudeCodeMessage
 import de.tomschmidtdev.copilotexporter.model.ClaudeCodeSession
 import de.tomschmidtdev.copilotexporter.model.Role
 import java.io.File
+import java.time.Instant
 
 object ClaudeJsonParser {
 
@@ -41,12 +42,14 @@ object ClaudeJsonParser {
                 "user" -> {
                     if (entry["isSidechain"]?.asBoolean() == true) continue
                     val content = entry["message"]?.get("content") ?: continue
-                    parseUserMessage(content, index)?.let { messages.add(it); index++ }
+                    val timestamp = parseTimestamp(entry["timestamp"]?.asText())
+                    parseUserMessage(content, index, timestamp)?.let { messages.add(it); index++ }
                 }
                 "assistant" -> {
                     if (entry["isSidechain"]?.asBoolean() == true) continue
                     val content = entry["message"]?.get("content") ?: continue
-                    parseAssistantMessage(content, index)?.let { messages.add(it); index++ }
+                    val timestamp = parseTimestamp(entry["timestamp"]?.asText())
+                    parseAssistantMessage(content, index, timestamp)?.let { messages.add(it); index++ }
                 }
             }
         }
@@ -63,7 +66,7 @@ object ClaudeJsonParser {
         )
     }
 
-    private fun parseUserMessage(content: JsonNode, index: Int): ClaudeCodeMessage? {
+    private fun parseUserMessage(content: JsonNode, index: Int, timestamp: Long): ClaudeCodeMessage? {
         val textBlocks = mutableListOf<String>()
         val toolResultBlocks = mutableListOf<String>()
 
@@ -89,10 +92,11 @@ object ClaudeJsonParser {
             textBlocks = textBlocks,
             thinkingBlocks = emptyList(),
             toolCallBlocks = toolResultBlocks,
+            timestamp = timestamp,
         )
     }
 
-    private fun parseAssistantMessage(content: JsonNode, index: Int): ClaudeCodeMessage? {
+    private fun parseAssistantMessage(content: JsonNode, index: Int, timestamp: Long): ClaudeCodeMessage? {
         if (!content.isArray) return null
         val textBlocks = mutableListOf<String>()
         val thinkingBlocks = mutableListOf<String>()
@@ -117,7 +121,13 @@ object ClaudeJsonParser {
             textBlocks = textBlocks,
             thinkingBlocks = thinkingBlocks,
             toolCallBlocks = toolCallBlocks,
+            timestamp = timestamp,
         )
+    }
+
+    private fun parseTimestamp(iso: String?): Long {
+        if (iso.isNullOrBlank()) return 0L
+        return runCatching { Instant.parse(iso).toEpochMilli() }.getOrDefault(0L)
     }
 
     /**

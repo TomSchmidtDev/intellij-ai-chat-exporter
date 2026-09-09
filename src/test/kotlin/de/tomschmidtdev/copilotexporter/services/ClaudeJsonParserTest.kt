@@ -25,23 +25,29 @@ class ClaudeJsonParserTest {
     private fun customTitle(title: String, sessionId: String = "s1") =
         mapper.writeValueAsString(mapOf("type" to "custom-title", "customTitle" to title, "sessionId" to sessionId))
 
-    private fun userMsg(content: Any, sidechain: Boolean = false) =
-        mapper.writeValueAsString(mapOf(
+    private fun userMsg(content: Any, sidechain: Boolean = false, timestamp: String? = null): String {
+        val fields = mutableMapOf<String, Any?>(
             "type" to "user",
             "isSidechain" to sidechain,
             "uuid" to "u1",
             "parentUuid" to null,
             "message" to mapOf("role" to "user", "content" to content),
-        ))
+        )
+        timestamp?.let { fields["timestamp"] = it }
+        return mapper.writeValueAsString(fields)
+    }
 
-    private fun assistantMsg(blocks: List<Map<String, Any>>, sidechain: Boolean = false) =
-        mapper.writeValueAsString(mapOf(
+    private fun assistantMsg(blocks: List<Map<String, Any>>, sidechain: Boolean = false, timestamp: String? = null): String {
+        val fields = mutableMapOf<String, Any?>(
             "type" to "assistant",
             "isSidechain" to sidechain,
             "uuid" to "a1",
             "parentUuid" to "u1",
             "message" to mapOf("role" to "assistant", "content" to blocks),
-        ))
+        )
+        timestamp?.let { fields["timestamp"] = it }
+        return mapper.writeValueAsString(fields)
+    }
 
     private fun textBlock(text: String) = mapOf("type" to "text", "text" to text)
     private fun thinkingBlock(t: String) = mapOf("type" to "thinking", "thinking" to t)
@@ -193,6 +199,29 @@ class ClaudeJsonParserTest {
         file.writeText("{ broken\n" + userMsg("hi") + "\n" + assistantMsg(listOf(textBlock("ok"))))
         val session = ClaudeJsonParser.parse(file)!!
         assertEquals(2, session.messages.size)
+    }
+
+    // -------------------------------------------------------------------------
+    // Timestamps
+    // -------------------------------------------------------------------------
+
+    @Test
+    fun `parses ISO timestamp on user and assistant messages`() {
+        val file = writeSession(
+            userMsg("hi", timestamp = "2026-08-22T14:37:24.790Z"),
+            assistantMsg(listOf(textBlock("hey")), timestamp = "2026-08-22T14:37:30.000Z"),
+        )
+        val session = ClaudeJsonParser.parse(file)!!
+        assertEquals(1787409444790L, session.messages[0].timestamp)
+        assertEquals(1787409450000L, session.messages[1].timestamp)
+    }
+
+    @Test
+    fun `defaults timestamp to zero when absent`() {
+        val file = writeSession(userMsg("hi"), assistantMsg(listOf(textBlock("hey"))))
+        val session = ClaudeJsonParser.parse(file)!!
+        assertEquals(0L, session.messages[0].timestamp)
+        assertEquals(0L, session.messages[1].timestamp)
     }
 
     // -------------------------------------------------------------------------

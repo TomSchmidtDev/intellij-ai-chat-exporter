@@ -18,6 +18,7 @@ data class ClaudeCodeMessage(
     val textBlocks: List<String>,
     val thinkingBlocks: List<String>,
     val toolCallBlocks: List<String>,
+    val timestamp: Long = 0L,
 ) {
     fun toExportText(showThinking: Boolean, showToolCalls: Boolean): String {
         val parts = mutableListOf<String>()

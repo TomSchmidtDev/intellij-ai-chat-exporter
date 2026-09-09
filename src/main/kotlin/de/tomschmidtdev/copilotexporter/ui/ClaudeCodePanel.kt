@@ -31,6 +31,9 @@ import de.tomschmidtdev.copilotexporter.services.ClaudeJsonParser
 import de.tomschmidtdev.copilotexporter.settings.ExporterSettingsConfigurable
 import java.awt.BorderLayout
 import java.awt.FlowLayout
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import javax.swing.*
 
 class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
@@ -522,6 +525,11 @@ class ClaudeCodePanel(private val project: Project) : JPanel(BorderLayout()) {
         }
         if (lines.isEmpty()) return ""
         val sb = StringBuilder("<html>")
+        if (msg.timestamp != 0L) {
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault())
+            val dateStr = formatter.format(Instant.ofEpochMilli(msg.timestamp))
+            sb.append("<b>$dateStr</b><hr>")
+        }
         val shown = lines.take(10)
         shown.forEach { line ->
             val display = if (line.length > 100) line.take(99) + "…" else line

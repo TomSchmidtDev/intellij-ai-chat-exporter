@@ -25,6 +25,9 @@ import de.tomschmidtdev.copilotexporter.services.CopilotCliSessionReaderService
 import de.tomschmidtdev.copilotexporter.settings.ExporterSettingsConfigurable
 import java.awt.BorderLayout
 import java.awt.FlowLayout
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import javax.swing.*
 
 class CopilotCliPanel(private val project: Project) : JPanel(BorderLayout()) {
@@ -33,7 +36,17 @@ class CopilotCliPanel(private val project: Project) : JPanel(BorderLayout()) {
     private var currentMessages: List<CopilotCliMessage> = emptyList()
 
     private val sessionList = CheckBoxList<CopilotCliSession>()
-    private val messageList = CheckBoxList<CopilotCliMessage>()
+    private val messageList = object : CheckBoxList<CopilotCliMessage>() {
+        init {
+            toolTipText = "" // aktiviert ToolTipManager für diese Komponente
+        }
+
+        override fun getToolTipText(e: java.awt.event.MouseEvent): String? {
+            val index = locationToIndex(e.point)
+            if (index < 0) return null
+            return getItemAt(index)?.let { buildMessageTooltip(it) }
+        }
+    }
 
     private val previewLabel = JBLabel("Preview").apply {
         border = JBUI.Borders.empty(6, 8, 4, 8)
@@ -101,6 +114,14 @@ class CopilotCliPanel(private val project: Project) : JPanel(BorderLayout()) {
         }
 
         val togglePanel = JPanel(FlowLayout(FlowLayout.LEFT, 4, 2)).apply {
+            add(JButton("Prompts", AllIcons.General.User).apply {
+                toolTipText = "Select / deselect all user prompts"
+                addActionListener { toggleTypeSelection { it.role == Role.USER } }
+            })
+            add(JButton("Assistant", AllIcons.Actions.Preview).apply {
+                toolTipText = "Select / deselect all assistant messages"
+                addActionListener { toggleTypeSelection { it.role == Role.ASSISTANT } }
+            })
             add(JButton("Tool Calls", AllIcons.Debugger.Console).apply {
                 toolTipText = "Select / deselect all messages with tool calls"
                 addActionListener { toggleTypeSelection { it.toolCallBlocks.isNotEmpty() } }
@@ -281,6 +302,33 @@ class CopilotCliPanel(private val project: Project) : JPanel(BorderLayout()) {
             result.add(session to selectedMessages)
         }
         return result
+    }
+
+    private fun buildMessageTooltip(msg: CopilotCliMessage): String {
+        val lines = mutableListOf<String>()
+        msg.textBlocks.forEach { lines.addAll(it.lines()) }
+        if (msg.toolCallBlocks.isNotEmpty()) {
+            lines.add("[Tool Calls]")
+            msg.toolCallBlocks.forEach { lines.addAll(it.lines()) }
+        }
+        if (lines.isEmpty()) return ""
+        val sb = StringBuilder("<html>")
+        if (msg.timestamp != 0L) {
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault())
+            val dateStr = formatter.format(Instant.ofEpochMilli(msg.timestamp))
+            sb.append("<b>$dateStr</b><hr>")
+        }
+        val shown = lines.take(10)
+        shown.forEach { line ->
+            val display = if (line.length > 100) line.take(99) + "…" else line
+            sb.append(display.escapeHtml()).append("<br>")
+        }
+        if (lines.size > 10) {
+            val remaining = lines.size - 10
+            sb.append("<i>… ($remaining further line${if (remaining != 1) "s" else ""})</i>")
+        }
+        sb.append("</html>")
+        return sb.toString()
     }
 
     private fun setStatus(text: String) {

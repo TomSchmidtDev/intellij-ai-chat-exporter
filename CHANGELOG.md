@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.10.0] - 2026-09-09
+
+### Added
+- The Claude Code and Copilot CLI tabs' message lists now show the same mouse-over tooltip preview as the Copilot tab, including the message's date/time when available. Claude Code sessions didn't carry a per-message timestamp before this — it's now parsed from each JSONL entry's `timestamp` field.
+- The Copilot CLI tab gained "Prompts" and "Assistant" bulk-select buttons (alongside the existing "Tool Calls" button), matching the Claude Code tab's toolbar.
+
 ## [1.9.1] - 2026-09-09
 
 ### Security
