@@ -1,10 +1,10 @@
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "2.1.20"
+    id("org.jetbrains.kotlin.jvm") version "2.4.20"
     id("org.jetbrains.intellij.platform") version "2.3.0"
 }
 
 group = "de.tomschmidtdev"
-version = "1.9.0"
+version = "1.9.1"
 
 kotlin {
     jvmToolchain(21)
@@ -30,6 +30,10 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.9.1</b>
+            <ul>
+                <li>Security: upgraded the Kotlin Gradle plugin to 2.4.20, fixing a moderate-severity unsafe-deserialization vulnerability in the Kotlin build cache (CVE-2026-53914). This is a build-time-only dependency and does not affect the shipped plugin's runtime behavior.</li>
+            </ul>
             <b>1.9.0</b>
             <ul>
                 <li>New: added a "Copilot CLI" tab for standalone/background Copilot CLI agent sessions (~/.copilot/session-state/), which GitHub Copilot for JetBrains now runs on by default — these sessions run outside the IDE panel and were previously not shown in the exporter at all; a "Tool Calls" button bulk-selects the messages containing tool calls before export</li>

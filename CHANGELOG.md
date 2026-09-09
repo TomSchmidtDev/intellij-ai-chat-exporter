@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.9.1] - 2026-09-09
+
+### Security
+- Upgraded the Kotlin Gradle plugin from 2.1.20 to 2.4.20, fixing [CVE-2026-53914](https://github.com/advisories/GHSA-r937-wjx7-w2jp) (GHSA-r937-wjx7-w2jp), a moderate-severity unsafe-deserialization issue in the Kotlin build cache that could allow code execution via crafted build cache metadata. This is a build-time compiler/plugin dependency only — it does not ship inside the plugin and has no effect on runtime behavior; verified with a full clean build and test run.
+
 ## [1.9.0] - 2026-09-08
 
 ### Added
