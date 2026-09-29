@@ -55,7 +55,7 @@ intellijPlatform {
             </ul>
             <b>1.7.5</b>
             <ul>
-                <li>Security: upgraded jackson-databind/jackson-core/jackson-annotations to 2.18.9, fixing four Dependabot-reported CVEs (two high, two moderate) in polymorphic-type-validator bypass, SSRF via InetSocketAddress deserialization, and a @JsonIgnoreProperties bypass — none of these deserialize untrusted input in this plugin, but the fix removes the vulnerable code paths from the shipped jar</li>
+                <li>Security: upgraded jackson-databind/jackson-core/jackson-annotations to 2.18.10, fixing four Dependabot-reported CVEs (two high, two moderate) in polymorphic-type-validator bypass, SSRF via InetSocketAddress deserialization, and a @JsonIgnoreProperties bypass — none of these deserialize untrusted input in this plugin, but the fix removes the vulnerable code paths from the shipped jar</li>
             </ul>
             <b>1.7.4</b>
             <ul>
@@ -270,13 +270,13 @@ dependencies {
     // moderate), case-insensitive @JsonIgnoreProperties bypass (CVE-2026-54515, moderate; fixed
     // only in 2.18.9+). jackson 2.17.1 (pulled in transitively by nitrite-jackson-mapper) is vulnerable.
     constraints {
-        implementation("com.fasterxml.jackson.core:jackson-core:2.18.9") {
+        implementation("com.fasterxml.jackson.core:jackson-core:2.18.10") {
             because("align jackson-core with forced jackson-databind version")
         }
-        implementation("com.fasterxml.jackson.core:jackson-databind:2.18.9") {
-            because("jackson-databind < 2.18.9 is vulnerable to several PTV/deserialization bypasses (GitHub Dependabot alerts)")
+        implementation("com.fasterxml.jackson.core:jackson-databind:2.18.10") {
+            because("jackson-databind < 2.18.10 is vulnerable to several PTV/deserialization bypasses (GitHub Dependabot alerts)")
         }
-        implementation("com.fasterxml.jackson.core:jackson-annotations:2.18.9") {
+        implementation("com.fasterxml.jackson.core:jackson-annotations:2.18.10") {
             because("align jackson-annotations with forced jackson-databind version")
         }
     }
