@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.10.1] - 2026-11-16
+
+### Security
+- Upgraded jackson-databind/jackson-core/jackson-annotations from 2.18.9 to 2.18.10, fixing three Dependabot-reported vulnerabilities: [CVE-2026-68497](https://github.com/advisories/GHSA-q4xh-88c3-wmh7) (high — unbounded number parse DoS in Duration/XMLGregorianCalendar deserialization), [CVE-2026-83557](https://github.com/advisories/GHSA-gx83-3vf8-gh7j) (moderate — `Comparable` missing from the PolymorphicTypeValidator unsafe-base-type denylist) and [CVE-2026-19032](https://github.com/advisories/GHSA-wjgm-6hv5-3cvf) (moderate — missing scheme allowlist in `Path` deserialization). The plugin does not deserialize untrusted input with these features, but the fix removes the vulnerable code paths from the shipped jar.
+
 ## [1.10.0] - 2026-09-09
 
 ### Added
