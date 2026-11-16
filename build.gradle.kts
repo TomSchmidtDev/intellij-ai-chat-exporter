@@ -32,7 +32,7 @@ intellijPlatform {
         changeNotes = """
             <b>1.10.1</b>
             <ul>
-                <li>Security: upgraded jackson-databind/jackson-core/jackson-annotations to 2.18.10, fixing three Dependabot-reported CVEs (one high, two moderate): an unbounded-number-parse DoS in Duration/XMLGregorianCalendar deserialization (CVE-2026-68497), an incomplete PolymorphicTypeValidator denylist (CVE-2026-83557), and a missing scheme allowlist in Path deserialization (CVE-2026-19032) — this plugin does not deserialize untrusted input with these features, but the fix removes the vulnerable code paths from the shipped jar</li>
+                <li>Security: upgraded jackson-databind/jackson-core/jackson-annotations to 2.18.11, fixing seven Dependabot-reported CVEs (five high, two moderate): denial-of-service issues in jackson-core (unbounded invalid-token buffer growth, CVE-2026-89425; float-pattern ReDoS, CVE-2026-89407) and jackson-databind (quadratic forward-reference completion, CVE-2026-91777; unbounded unknown-type-ID retention, CVE-2026-91776; Duration/XMLGregorianCalendar number-parse DoS, CVE-2026-68497), an incomplete PolymorphicTypeValidator denylist (CVE-2026-83557), and a missing scheme allowlist in Path deserialization (CVE-2026-19032) — this plugin does not deserialize untrusted input with these features, but the fix removes the vulnerable code paths from the shipped jar</li>
             </ul>
             <b>1.10.0</b>
             <ul>
@@ -269,7 +269,11 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    // Force jackson >= 2.18.10 to fix CVEs: Duration/XMLGregorianCalendar number-parse DoS
+    // Force jackson >= 2.18.11 to fix CVEs: jackson-core unbounded invalid-token StringBuilder DoS
+    // (CVE-2026-89425, high), jackson-core PATTERN_FLOAT ReDoS (CVE-2026-89407, high),
+    // jackson-databind quadratic forward-reference completion (CVE-2026-91777, high), unbounded
+    // retention of unknown raw type IDs (CVE-2026-91776, high) — all fixed in 2.18.11.
+    // Earlier (2.18.10): Duration/XMLGregorianCalendar number-parse DoS
     // (CVE-2026-68497, high), incomplete PTV denylist (CVE-2026-83557, moderate), Path
     // deserialization scheme allowlist (CVE-2026-19032, moderate) — all fixed in 2.18.10.
     // Earlier (2.18.9): PTV generic-parameter bypass (CVE-2026-54512, high),
@@ -277,13 +281,13 @@ dependencies {
     // moderate), case-insensitive @JsonIgnoreProperties bypass (CVE-2026-54515, moderate; fixed
     // only in 2.18.9+). jackson 2.17.1 (pulled in transitively by nitrite-jackson-mapper) is vulnerable.
     constraints {
-        implementation("com.fasterxml.jackson.core:jackson-core:2.18.10") {
+        implementation("com.fasterxml.jackson.core:jackson-core:2.18.11") {
             because("align jackson-core with forced jackson-databind version")
         }
-        implementation("com.fasterxml.jackson.core:jackson-databind:2.18.10") {
-            because("jackson-databind < 2.18.10 is vulnerable to several PTV/deserialization bypasses (GitHub Dependabot alerts)")
+        implementation("com.fasterxml.jackson.core:jackson-databind:2.18.11") {
+            because("jackson-databind < 2.18.11 is vulnerable to several PTV/deserialization bypasses (GitHub Dependabot alerts)")
         }
-        implementation("com.fasterxml.jackson.core:jackson-annotations:2.18.10") {
+        implementation("com.fasterxml.jackson.core:jackson-annotations:2.18.11") {
             because("align jackson-annotations with forced jackson-databind version")
         }
     }
