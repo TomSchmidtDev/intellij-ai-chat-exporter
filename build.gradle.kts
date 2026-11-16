@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.tomschmidtdev"
-version = "1.10.0"
+version = "1.10.1"
 
 kotlin {
     jvmToolchain(21)
@@ -30,6 +30,10 @@ intellijPlatform {
 
         // Shown on the Marketplace "What's New" tab. Update with each release.
         changeNotes = """
+            <b>1.10.1</b>
+            <ul>
+                <li>Security: upgraded jackson-databind/jackson-core/jackson-annotations to 2.18.10, fixing three Dependabot-reported CVEs (one high, two moderate): an unbounded-number-parse DoS in Duration/XMLGregorianCalendar deserialization (CVE-2026-68497), an incomplete PolymorphicTypeValidator denylist (CVE-2026-83557), and a missing scheme allowlist in Path deserialization (CVE-2026-19032) — this plugin does not deserialize untrusted input with these features, but the fix removes the vulnerable code paths from the shipped jar</li>
+            </ul>
             <b>1.10.0</b>
             <ul>
                 <li>New: the Claude Code and Copilot CLI tabs now show the same mouse-over message preview (with date/time) as the Copilot tab</li>
@@ -55,7 +59,7 @@ intellijPlatform {
             </ul>
             <b>1.7.5</b>
             <ul>
-                <li>Security: upgraded jackson-databind/jackson-core/jackson-annotations to 2.18.10, fixing four Dependabot-reported CVEs (two high, two moderate) in polymorphic-type-validator bypass, SSRF via InetSocketAddress deserialization, and a @JsonIgnoreProperties bypass — none of these deserialize untrusted input in this plugin, but the fix removes the vulnerable code paths from the shipped jar</li>
+                <li>Security: upgraded jackson-databind/jackson-core/jackson-annotations to 2.18.9, fixing four Dependabot-reported CVEs (two high, two moderate) in polymorphic-type-validator bypass, SSRF via InetSocketAddress deserialization, and a @JsonIgnoreProperties bypass — none of these deserialize untrusted input in this plugin, but the fix removes the vulnerable code paths from the shipped jar</li>
             </ul>
             <b>1.7.4</b>
             <ul>
@@ -265,7 +269,10 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    // Force jackson >= 2.18.9 to fix CVEs: PTV generic-parameter bypass (CVE-2026-54512, high),
+    // Force jackson >= 2.18.10 to fix CVEs: Duration/XMLGregorianCalendar number-parse DoS
+    // (CVE-2026-68497, high), incomplete PTV denylist (CVE-2026-83557, moderate), Path
+    // deserialization scheme allowlist (CVE-2026-19032, moderate) — all fixed in 2.18.10.
+    // Earlier (2.18.9): PTV generic-parameter bypass (CVE-2026-54512, high),
     // PTV array-subtype bypass (CVE-2026-54513, high), InetSocketAddress SSRF (CVE-2026-54514,
     // moderate), case-insensitive @JsonIgnoreProperties bypass (CVE-2026-54515, moderate; fixed
     // only in 2.18.9+). jackson 2.17.1 (pulled in transitively by nitrite-jackson-mapper) is vulnerable.
