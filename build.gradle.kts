@@ -10,6 +10,12 @@ kotlin {
     jvmToolchain(21)
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        // NO_COMPATIBILITY stops Kotlin 2.2+ from synthesizing bridge overrides for every
+        // default method of platform interfaces (e.g. ToolWindowFactory.isApplicable,
+        // isDoNotActivateOnStart, getAnchor, getIcon, manage). Those bridges made the
+        // Marketplace Plugin Verifier report deprecated/experimental/internal API usages
+        // in ExporterToolWindowFactory although our source never touches these members.
+        jvmDefault.set(org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode.NO_COMPATIBILITY)
     }
 }
 java {
@@ -32,6 +38,7 @@ intellijPlatform {
         changeNotes = """
             <b>1.10.1</b>
             <ul>
+                <li>Fixed: resolved all JetBrains Marketplace compatibility warnings (deprecated, experimental and internal API usages) — the "open exported file" action no longer uses FileEditorManager.openFile(), deprecated in IntelliJ 2026.3, and the tool window factory no longer carries compiler-generated overrides of deprecated/experimental platform methods</li>
                 <li>Security: upgraded jackson-databind/jackson-core/jackson-annotations to 2.18.11, fixing seven Dependabot-reported CVEs (five high, two moderate): denial-of-service issues in jackson-core (unbounded invalid-token buffer growth, CVE-2026-89425; float-pattern ReDoS, CVE-2026-89407) and jackson-databind (quadratic forward-reference completion, CVE-2026-91777; unbounded unknown-type-ID retention, CVE-2026-91776; Duration/XMLGregorianCalendar number-parse DoS, CVE-2026-68497), an incomplete PolymorphicTypeValidator denylist (CVE-2026-83557), and a missing scheme allowlist in Path deserialization (CVE-2026-19032) — this plugin does not deserialize untrusted input with these features, but the fix removes the vulnerable code paths from the shipped jar</li>
             </ul>
             <b>1.10.0</b>

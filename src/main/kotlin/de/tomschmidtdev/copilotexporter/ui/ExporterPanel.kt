@@ -10,6 +10,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.options.ShowSettingsUtil
+import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.ui.CheckBoxList
 import com.intellij.ui.JBSplitter
@@ -470,9 +471,10 @@ class ExporterPanel(private val project: Project) : JPanel(BorderLayout()) {
                 // Datei im IDE-Editor öffnen
                 ApplicationManager.getApplication().invokeLater {
                     LocalFileSystem.getInstance().refreshAndFindFileByIoFile(outputFile)?.let { vf ->
-                        com.intellij.openapi.fileEditor.FileEditorManager
-                            .getInstance(project)
-                            .openFile(vf, true)
+                        // OpenFileDescriptor.navigate() instead of FileEditorManager.openFile(vf, true):
+                        // openFile(VirtualFile, Boolean) is deprecated as of IntelliJ 2026.3, and its
+                        // replacement requestOpenFile() doesn't exist in our minimum platform (2025.1).
+                        OpenFileDescriptor(project, vf).navigate(true)
                     }
                 }
             }

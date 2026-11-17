@@ -1,6 +1,9 @@
 # Changelog
 
-## [1.10.1] - 2026-11-16
+## [1.10.1] - 2026-11-17
+
+### Fixed
+- Resolved all JetBrains Marketplace Plugin Verifier warnings. Opening the exported file now uses `OpenFileDescriptor.navigate()` instead of `FileEditorManager.openFile(VirtualFile, Boolean)`, which is deprecated as of IntelliJ 2026.3 (its replacement `requestOpenFile()` is not available in 2025.1, the plugin's minimum). The Kotlin compiler now uses `jvmDefault = NO_COMPATIBILITY`, so it no longer synthesizes bridge overrides of `ToolWindowFactory`'s deprecated/experimental/internal default methods (`isApplicable`, `isDoNotActivateOnStart`, `getAnchor`, `getIcon`, `manage`). Verified locally as plain "Compatible" against IntelliJ 2025.1, 2025.2.6 and 2026.3.
 
 ### Security
 - Upgraded jackson-databind/jackson-core/jackson-annotations from 2.18.9 to 2.18.11, fixing seven Dependabot-reported vulnerabilities: [CVE-2026-89425](https://github.com/advisories/GHSA-7hhh-6rmp-j9qf) (high — unbounded `StringBuilder` growth when reporting invalid tokens in jackson-core), [CVE-2026-89407](https://github.com/advisories/GHSA-p6pp-m3f8-5c89) (high — ReDoS in jackson-core's float-number pattern), [CVE-2026-91777](https://github.com/advisories/GHSA-cxp5-3px4-pw24) (high — quadratic forward-reference completion in jackson-databind), [CVE-2026-91776](https://github.com/advisories/GHSA-wv8q-qhhj-9h54) (high — jackson-databind retains every unknown raw type ID), [CVE-2026-68497](https://github.com/advisories/GHSA-q4xh-88c3-wmh7) (high — unbounded number parse DoS in Duration/XMLGregorianCalendar deserialization), [CVE-2026-83557](https://github.com/advisories/GHSA-gx83-3vf8-gh7j) (moderate — `Comparable` missing from the PolymorphicTypeValidator unsafe-base-type denylist) and [CVE-2026-19032](https://github.com/advisories/GHSA-wjgm-6hv5-3cvf) (moderate — missing scheme allowlist in `Path` deserialization). The plugin does not deserialize untrusted input with these features, but the fix removes the vulnerable code paths from the shipped jar.
